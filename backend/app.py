@@ -1,19 +1,11 @@
-import email
-
 from flask import Flask, request, jsonify
 from pypdf import PdfReader
 from flask_cors import CORS
-from flask_mail import Mail, Message
 import os
 app = Flask(__name__)
-app.config["MAIL_SERVER"] = "smtp.gmail.com"
-app.config["MAIL_PORT"] = 587
-app.config["MAIL_USE_TLS"] = True
-app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
-app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
-app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_USERNAME")
-
-mail = Mail(app)
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from google import genai
@@ -1260,35 +1252,42 @@ def send_otp():
     }
     print("OTP STORE:", otp_store)
     try:
-        msg = Message(
-            subject="InterviewAI Password Reset OTP",
-            recipients=[user.email]
-        )
+        sender_email = os.getenv("MAIL_USERNAME")
+        sender_password = os.getenv("MAIL_PASSWORD")
 
-        msg.body = f"""
-Hello {user.name},
+        msg = MIMEMultipart()
+        msg["From"] = sender_email
+        msg["To"] = user.email
+        msg["Subject"] = "InterviewAI Password Reset OTP"
 
-Your OTP for resetting your InterviewAI password is:
+        body = f"""
+    Hello {user.name},
 
-{otp}
+    Your OTP for resetting your InterviewAI password is:
 
-This OTP is valid for 5 minutes.
+    {otp}
 
-If you didn't request a password reset, please ignore this email.
+    This OTP is valid for 5 minutes.
 
-Regards,
-InterviewAI Team
-"""
+    If you didn't request a password reset, please ignore this email.
 
-        mail.send(msg)
+    Regards,
+    InterviewAI Team
+    """
+
+        msg.attach(MIMEText(body, "plain"))
+
+        with smtplib.SMTP("smtp.gmail.com", 587, timeout=20) as server:
+            server.starttls()
+            server.login(sender_email, sender_password)
+            server.sendmail(sender_email, user.email, msg.as_string())
 
         return jsonify({
             "message": "OTP sent successfully"
         })
 
     except Exception as e:
-        traceback.print_exc()
-        
+        print("EMAIL ERROR:", str(e))
         return jsonify({
             "error": str(e)
         }), 500
