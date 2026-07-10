@@ -22,7 +22,7 @@ import jwt
 import datetime
 import random
 import time
-
+import traceback
 load_dotenv()
 
 app = Flask(__name__)
@@ -1287,6 +1287,8 @@ InterviewAI Team
         })
 
     except Exception as e:
+        traceback.print_exc()
+        
         return jsonify({
             "error": str(e)
         }), 500
