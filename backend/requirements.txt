@@ -56,3 +56,4 @@ uritemplate==4.2.0
 urllib3==2.7.0
 websockets==16.0
 gunicorn==23.0.0
+sib-api-v3-sdk

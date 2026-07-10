@@ -1,3 +1,5 @@
+import sib_api_v3_sdk
+from sib_api_v3_sdk.rest import ApiException
 from flask import Flask, request, jsonify
 from pypdf import PdfReader
 from flask_cors import CORS
@@ -1252,42 +1254,45 @@ def send_otp():
     }
     print("OTP STORE:", otp_store)
     try:
-        sender_email = os.getenv("MAIL_USERNAME")
-        sender_password = os.getenv("MAIL_PASSWORD")
+        configuration = sib_api_v3_sdk.Configuration()
+        configuration.api_key["api-key"] = os.getenv("BREVO_API_KEY")
 
-        msg = MIMEMultipart()
-        msg["From"] = sender_email
-        msg["To"] = user.email
-        msg["Subject"] = "InterviewAI Password Reset OTP"
+        api_instance = sib_api_v3_sdk.TransactionalEmailsApi(
+            sib_api_v3_sdk.ApiClient(configuration)
+        )
 
-        body = f"""
-    Hello {user.name},
+        send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
+            to=[{"email": user.email, "name": user.name}],
+            sender={
+                "email": "hansikhagarine31@gmail.com",
+                "name": "InterviewAI"
+            },
+            subject="InterviewAI Password Reset OTP",
+            html_content=f"""
+            <h2>Hello {user.name},</h2>
 
-    Your OTP for resetting your InterviewAI password is:
+            <p>Your OTP for resetting your password is:</p>
 
-    {otp}
+            <h1>{otp}</h1>
 
-    This OTP is valid for 5 minutes.
+            <p>This OTP is valid for <b>5 minutes</b>.</p>
 
-    If you didn't request a password reset, please ignore this email.
+            <p>If you didn't request this, please ignore this email.</p>
 
-    Regards,
-    InterviewAI Team
-    """
+            <br>
 
-        msg.attach(MIMEText(body, "plain"))
+            <b>InterviewAI Team</b>
+            """
+        )
 
-        with smtplib.SMTP("smtp.gmail.com", 587, timeout=20) as server:
-            server.starttls()
-            server.login(sender_email, sender_password)
-            server.sendmail(sender_email, user.email, msg.as_string())
+        api_instance.send_transac_email(send_smtp_email)
 
         return jsonify({
             "message": "OTP sent successfully"
         })
 
-    except Exception as e:
-        print("EMAIL ERROR:", str(e))
+    except ApiException as e:
+        print("BREVO ERROR:", e)
         return jsonify({
             "error": str(e)
         }), 500
