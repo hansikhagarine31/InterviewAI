@@ -1,6 +1,16 @@
 from flask import Flask, request, jsonify
 from pypdf import PdfReader
 from flask_cors import CORS
+from flask_mail import Mail, Message
+app = Flask(__name__)
+app.config["MAIL_SERVER"] = "smtp.gmail.com"
+app.config["MAIL_PORT"] = 587
+app.config["MAIL_USE_TLS"] = True
+app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
+app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
+app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_USERNAME")
+
+mail = Mail(app)
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from google import genai
@@ -1228,10 +1238,7 @@ def change_password():
         "message":
         "Password changed successfully."
     })
-@app.route(
-    "/send-otp",
-    methods=["POST"]
-)
+@app.route("/send-otp", methods=["POST"])
 def send_otp():
 
     data = request.json
@@ -1241,31 +1248,49 @@ def send_otp():
     ).first()
 
     if not user:
-
         return jsonify({
             "error": "Email not found."
         }), 404
 
-    otp = str(
-        random.randint(
-            100000,
-            999999
-        )
-    )
+    otp = str(random.randint(100000, 999999))
 
     otp_store[user.email] = {
-    "otp": otp,
-    "expires": time.time() + 300
-}
+        "otp": otp,
+        "expires": time.time() + 300
+    }
 
-    print("\n========================")
-    print("OTP:", otp)
-    print("Email:", user.email)
-    print("========================\n")
+    try:
+        msg = Message(
+            subject="InterviewAI Password Reset OTP",
+            recipients=[user.email]
+        )
 
-    return jsonify({
-        "message": "OTP generated"
-    })
+        msg.body = f"""
+Hello {user.name},
+
+Your OTP for resetting your InterviewAI password is:
+
+{otp}
+
+This OTP is valid for 5 minutes.
+
+If you didn't request a password reset, please ignore this email.
+
+Regards,
+InterviewAI Team
+"""
+
+        mail.send(msg)
+
+        return jsonify({
+            "message": "OTP sent successfully"
+        })
+
+    except Exception as e:
+        return jsonify({
+            "error": str(e)
+        }), 500
+
 @app.route(
     "/reset-password",
     methods=["POST"]
