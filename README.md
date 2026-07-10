@@ -1,16 +1,176 @@
-# React + Vite
+# 🤖 InterviewAI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An AI-powered Interview Preparation Platform that helps users practice technical and HR interviews with personalized AI feedback, resume-based question generation, interview history tracking, and performance analytics.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Live Demo
 
-## React Compiler
+🌐 Frontend: https://interview-ai-frontend-livid.vercel.app
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+⚙️ Backend: https://interview-ai-backend-dfic.onrender.com
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## ✨ Features
+
+- 🔐 User Authentication
+  - Register
+  - Login
+  - Google OAuth Login
+  - Forgot Password with Email OTP
+  - Secure Password Reset
+
+- 🤖 AI Interview Practice
+  - HR Interview
+  - Technical Interview
+  - Resume-based Interview
+  - Company-specific Interview
+
+- 📄 Resume Upload
+  - PDF Resume Parsing
+  - AI-generated Resume Questions
+
+- 📊 AI Evaluation
+  - Overall Score
+  - Strengths
+  - Weaknesses
+  - Suggestions for Improvement
+
+- 📈 Dashboard
+  - Interview History
+  - Previous Scores
+  - User Profile
+
+- 📑 Report Generation
+  - Download Interview Report as PDF
+
+- 📱 Responsive UI
+
+---
+
+## 🛠 Tech Stack
+
+### Frontend
+
+- React.js
+- React Router
+- Axios
+- Chart.js
+- CSS
+
+### Backend
+
+- Flask
+- SQLAlchemy
+- Flask-Bcrypt
+- JWT Authentication
+- Google OAuth
+- Google Gemini AI
+- Flask-Mail
+- PyPDF
+
+### Database
+
+- SQLite
+
+### Deployment
+
+- Frontend → Vercel
+- Backend → Render
+
+---
+
+## Project Structure
+
+```
+InterviewAI/
+│
+├── backend/
+│   ├── app.py
+│   ├── requirements.txt
+│   ├── Profile
+│   └── instance/
+│
+├── src/
+├── public/
+├── package.json
+└── README.md
+```
+
+---
+
+## Installation
+
+### Clone the repository
+
+```bash
+git clone https://github.com/hansikhagarine31/InterviewAI.git
+```
+
+### Backend
+
+```bash
+cd backend
+
+python -m venv venv
+
+venv\Scripts\activate
+
+pip install -r requirements.txt
+
+python app.py
+```
+
+### Frontend
+
+```bash
+npm install
+
+npm run dev
+```
+
+---
+
+## Environment Variables
+
+Create a `.env` file inside the backend folder.
+
+```
+GEMINI_API_KEY=
+
+SECRET_KEY=
+
+MAIL_USERNAME=
+
+MAIL_PASSWORD=
+
+DATABASE_URL=
+
+ALLOWED_ORIGINS=
+```
+
+---
+
+## Future Improvements
+
+- Email Verification
+- More Company Interview Sets
+- AI Voice Interviews
+- Interview Analytics
+- Leaderboard
+- Certificate Generation
+
+---
+
+## Author
+
+**Hansikha Garine**
+
+GitHub:
+https://github.com/hansikhagarine31
+
+LinkedIn:
+https://www.linkedin.com/in/hansikhagarine31/
+
+---
