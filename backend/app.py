@@ -1,3 +1,5 @@
+import email
+
 from flask import Flask, request, jsonify
 from pypdf import PdfReader
 from flask_cors import CORS
@@ -1256,7 +1258,7 @@ def send_otp():
         "otp": otp,
         "expires": time.time() + 300
     }
-
+    print("OTP STORE:", otp_store)
     try:
         msg = Message(
             subject="InterviewAI Password Reset OTP",
@@ -1302,7 +1304,8 @@ def reset_password():
     email = data["email"]
     otp = data["otp"]
     new_password = data["new_password"]
-
+    print("OTP STORE DURING RESET:", otp_store)
+    print("EMAIL:", email)
     if email not in otp_store:
 
         return jsonify({
