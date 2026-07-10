@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from pypdf import PdfReader
 from flask_cors import CORS
 from flask_mail import Mail, Message
+import os
 app = Flask(__name__)
 app.config["MAIL_SERVER"] = "smtp.gmail.com"
 app.config["MAIL_PORT"] = 587
@@ -15,7 +16,6 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 from google import genai
 from dotenv import load_dotenv
-import os
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 import jwt
