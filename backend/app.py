@@ -25,8 +25,6 @@ import time
 import traceback
 load_dotenv()
 
-app = Flask(__name__)
-
 # Restrict CORS to known frontend origin(s) in production.
 # Set ALLOWED_ORIGINS to a comma-separated list, e.g.
 # "https://your-app.vercel.app,http://localhost:5173"
