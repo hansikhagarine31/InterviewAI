@@ -688,7 +688,7 @@ def evaluate():
         data = request.json
         answers = data.get("answers", [])
         image = data.get("image")
-        print("Image received:", image is not None)
+        
         prompt_text = f"""
 You are a professional interviewer.
 
@@ -740,7 +740,6 @@ Be strict.
 
     except Exception as e:
 
-        print("EVALUATE ERROR:", str(e))
 
         return jsonify({
             "error":
@@ -755,7 +754,16 @@ def upload_resume():
 
     try:
 
-        file = request.files["resume"]
+        print("Content-Type:", request.content_type)
+        print("Files:", request.files)
+        print("Form:", request.form)
+
+        file = request.files.get("resume")
+
+        if file is None:
+            return jsonify({
+                "error": "Resume file not received."
+            }), 400
 
         reader = PdfReader(file)
 
@@ -791,8 +799,7 @@ def upload_resume():
             if q.strip()
         ]
 
-        print("Generated Questions:")
-        print(questions)
+        
 
         return jsonify({
             "questions": questions
@@ -800,7 +807,7 @@ def upload_resume():
 
     except Exception as e:
 
-        print("RESUME ERROR:", str(e))
+        
 
         return jsonify({
             "error": str(e)
@@ -917,10 +924,6 @@ No explanations.
 
     except Exception as e:
 
-        print(
-            "QUESTION GENERATION ERROR:",
-            str(e)
-        )
 
         return jsonify({
             "error": str(e)
@@ -951,10 +954,7 @@ def company_insights():
 def save_interview():
 
     data = request.json
-    print(
-    "Saving for user:",
-    data["user_id"]
-)
+    
     interview = Interview(
         user_id=data["user_id"],
         date=data["date"],
@@ -996,24 +996,13 @@ def user_history(user_id):
         user_id=user_id
     ).all()
 
-    print("\n==========")
-    print("USER ID:", user_id)
-    print("TOTAL:", len(interviews))
+   
 
     result = []
 
     for interview in interviews:
 
-        print(
-            "Interview ID:",
-            interview.id,
-            "| User:",
-            interview.user_id,
-            "| Date:",
-            interview.date,
-            "| Score:",
-            interview.score
-        )
+        
 
         result.append({
             "id": interview.id,
@@ -1022,7 +1011,7 @@ def user_history(user_id):
             "feedback": interview.feedback
         })
 
-    print("==========\n")
+    
 
     return jsonify(result)
 @app.route(
@@ -1056,10 +1045,7 @@ def delete_all_history():
 )
 def clear_history(user_id):
 
-    print(
-        "CLEAR HISTORY HIT",
-        user_id
-    )
+    
 
     Interview.query.filter_by(
         user_id=user_id
@@ -1108,7 +1094,7 @@ def profile(user_id):
 def update_profile():
 
     data = request.json
-    print(data)
+    
     user = User.query.get(
         data["user_id"]
     )
@@ -1126,13 +1112,13 @@ def update_profile():
         data["password"] != ""
     ):
 
-        print("Before:", user.password)
+        
 
         user.password = bcrypt.generate_password_hash(
             data["password"]
         ).decode("utf-8")
 
-        print("After:", user.password)
+        
 
     db.session.commit()
 
@@ -1252,7 +1238,6 @@ def send_otp():
         "otp": otp,
         "expires": time.time() + 300
     }
-    print("OTP STORE:", otp_store)
     try:
         configuration = sib_api_v3_sdk.Configuration()
         configuration.api_key["api-key"] = os.getenv("BREVO_API_KEY")
@@ -1292,7 +1277,6 @@ def send_otp():
         })
 
     except ApiException as e:
-        print("BREVO ERROR:", e)
         return jsonify({
             "error": str(e)
         }), 500
@@ -1308,8 +1292,6 @@ def reset_password():
     email = data["email"]
     otp = data["otp"]
     new_password = data["new_password"]
-    print("OTP STORE DURING RESET:", otp_store)
-    print("EMAIL:", email)
     if email not in otp_store:
 
         return jsonify({
