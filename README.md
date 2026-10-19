@@ -99,7 +99,7 @@ cd backend
 python -m venv venv
 venv\Scripts\activate        # macOS/Linux: source venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env         # then fill in GEMINI_API_KEY and SECRET_KEY
+# create backend/.env with GEMINI_API_KEY and SECRET_KEY (see the table below)
 python app.py                # http://127.0.0.1:5000
 ```
 
@@ -107,7 +107,7 @@ python app.py                # http://127.0.0.1:5000
 
 ```bash
 npm install
-cp .env.example .env         # optional: set VITE_GOOGLE_CLIENT_ID for Google sign-in
+# optional: create .env with VITE_GOOGLE_CLIENT_ID for Google sign-in
 npm run dev                  # http://localhost:5173
 ```
 
