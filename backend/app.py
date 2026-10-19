@@ -124,6 +124,23 @@ def auth_required(f):
     return wrapper
 
 
+def admin_required(f):
+    """Auth plus membership in ADMIN_EMAILS (comma-separated). Unset = nobody."""
+    @wraps(f)
+    @auth_required
+    def wrapper(*args, **kwargs):
+        admins = {
+            e.strip().lower()
+            for e in os.getenv("ADMIN_EMAILS", "").split(",")
+            if e.strip()
+        }
+        user = db.session.get(User, g.user_id)
+        if not user or user.email.lower() not in admins:
+            return jsonify({"error": "Forbidden."}), 403
+        return f(*args, **kwargs)
+    return wrapper
+
+
 def forbidden_unless_self(user_id):
     if user_id != g.user_id:
         return jsonify({"error": "Forbidden."}), 403
@@ -1188,6 +1205,44 @@ def google_login():
     return jsonify({
         "token": make_token(user),
         "user": {"id": user.id, "name": user.name, "email": user.email}
+    })
+
+
+
+@app.route("/admin/users")
+@admin_required
+def admin_list_users():
+    users = User.query.order_by(User.id).all()
+    return jsonify([
+        {
+            "id": u.id,
+            "name": u.name,
+            "email": u.email,
+            "interviews": Interview.query.filter_by(user_id=u.id).count()
+        }
+        for u in users
+    ])
+
+
+@app.route("/admin/users/<int:user_id>", methods=["DELETE"])
+@admin_required
+def admin_delete_user(user_id):
+    if user_id == g.user_id:
+        return jsonify({"error": "You cannot delete your own account."}), 400
+
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({"error": "User not found."}), 404
+
+    removed = Interview.query.filter_by(user_id=user_id).delete()
+    db.session.delete(user)
+    db.session.commit()
+    otp_store.pop(user.email, None)
+
+    return jsonify({
+        "message": "User deleted",
+        "email": user.email,
+        "interviews_deleted": removed
     })
 
 
