@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import api from "../api/client";
 import { useNavigate, Link } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
-import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
 function Login() {
 
@@ -24,6 +23,11 @@ function Login() {
 
 }, [navigate]);
   const loginUser = async () => {
+
+    if (!email.trim() || !password) {
+      toast.error("Please enter email and password");
+      return;
+    }
 
     setLoading(true);
 
@@ -112,11 +116,6 @@ function Login() {
   <GoogleLogin
 
     onSuccess={async (credentialResponse) => {
-
-  const googleUser =
-    jwtDecode(
-      credentialResponse.credential
-    );
 
   try {
 

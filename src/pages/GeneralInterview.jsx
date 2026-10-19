@@ -1,6 +1,7 @@
 import { useState } from "react";
 import api from "../api/client";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 function GeneralInterview() {
 
@@ -18,6 +19,8 @@ function GeneralInterview() {
     setQuestionCount] =
     useState(5);
 
+  const [loading, setLoading] = useState(false);
+
   const startInterview = async () => {
     if (
   interviewType ===
@@ -26,27 +29,38 @@ function GeneralInterview() {
   navigate("/resume");
   return;
 }
-    const response =
-      await api.post(
-        "/generate-questions",
-        {
+    setLoading(true);
+
+    try {
+      const response =
+        await api.post(
+          "/generate-questions",
+          {
+            interviewType,
+            difficulty,
+            questionCount,
+            interviewMode:
+              "General"
+          }
+        );
+
+      navigate("/interview", {
+        state: {
           interviewType,
           difficulty,
           questionCount,
-          interviewMode:
-            "General"
+          generatedQuestions:
+            response.data.questions
         }
+      });
+    } catch (err) {
+      toast.error(
+        err.response?.data?.error ||
+        "Failed to generate questions"
       );
-
-    navigate("/interview", {
-      state: {
-        interviewType,
-        difficulty,
-        questionCount,
-        generatedQuestions:
-          response.data.questions
-      }
-    });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -132,8 +146,9 @@ function GeneralInterview() {
           className="submit-btn"
           onClick={startInterview}
           style={{ marginTop: "15px" }}
+          disabled={loading}
         >
-          Start Interview
+          {loading ? "Generating questions..." : "Start Interview"}
         </button>
 
       </div>

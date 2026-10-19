@@ -46,7 +46,7 @@ function Dashboard() {
             `/user-history/${user.id}`
           );
 
-        setHistory(res.data);
+        setHistory([...res.data].reverse());
 
       } catch (err) {
 

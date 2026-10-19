@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 function ResumeUpload() {
 
   const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -19,18 +20,29 @@ function ResumeUpload() {
 
     formData.append("resume", file);
 
-    const response = await api.post(
-      "/upload-resume",
-      formData
-    );
+    setLoading(true);
 
-    navigate("/interview", {
-      state: {
-        interviewType: "Resume Interview",
-        generatedQuestions:
-          response.data.questions
-      }
-    });
+    try {
+      const response = await api.post(
+        "/upload-resume",
+        formData
+      );
+
+      navigate("/interview", {
+        state: {
+          interviewType: "Resume Interview",
+          generatedQuestions:
+            response.data.questions
+        }
+      });
+    } catch (err) {
+      toast.error(
+        err.response?.data?.error ||
+        "Failed to process resume"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -42,7 +54,7 @@ function ResumeUpload() {
         type="file"
         accept=".pdf"
         onChange={(e) =>
-          setFile(e.target.files[0])
+          setFile(e.target.files[0] || null)
         }
       />
 
@@ -51,8 +63,9 @@ function ResumeUpload() {
       <button
         className="submit-btn"
         onClick={handleUpload}
+        disabled={loading}
       >
-        Generate Interview
+        {loading ? "Analyzing resume..." : "Generate Interview"}
       </button>
 
     </div>

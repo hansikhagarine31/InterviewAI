@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useRef } from "react";
 import api from "../api/client";
+import toast from "react-hot-toast";
 import { jsPDF } from "jspdf";
 import {
   CircularProgressbar,
@@ -19,12 +20,16 @@ function Report() {
   const answers =
     location.state?.answers || [];
 
+  const questions =
+    location.state?.questions || [];
+
   const scoreMatch =
-    feedback.match(/(\d+)\/100/i);
+    feedback.match(/SCORE:\s*(\d+)/i) ||
+    feedback.match(/(\d+)\s*\/\s*100/);
 
   const score =
     scoreMatch
-      ? Number(scoreMatch[1])
+      ? Math.min(Number(scoreMatch[1]), 100)
       : 0;
 
   const communication =
@@ -79,23 +84,21 @@ if (improvementPlan.length === 0) {
   );
 }
 
-let recommendation = "Ready for Interviews 🚀";
+const recommendation =
+  score < 60
+    ? "Needs Significant Improvement"
+    : score < 80
+    ? "Good Candidate - More Practice Recommended"
+    : score < 90
+    ? "Interview Ready"
+    : "Outstanding Candidate";
 
-if (score < 60)
-  recommendation =
-    "Needs Significant Improvement";
-
-else if (score < 80)
-  recommendation =
-    "Good Candidate - More Practice Recommended";
-
-else if (score < 90)
-  recommendation =
-    "Interview Ready";
-
-else
-  recommendation =
-    "Outstanding Candidate";
+  let currentUser = null;
+  try {
+    currentUser = JSON.parse(localStorage.getItem("user"));
+  } catch {
+    currentUser = null;
+  }
 
   const downloadPDF = () => {
 
@@ -130,9 +133,14 @@ else
 
         const lines =
           doc.splitTextToSize(
-            `${index + 1}. ${answer}`,
+            `${index + 1}. ${questions[index] ? "Q: " + questions[index] + "\nA: " : ""}${answer}`,
             170
           );
+
+        if (y + lines.length * 7 > 280) {
+          doc.addPage();
+          y = 20;
+        }
 
         doc.text(
           lines,
@@ -161,11 +169,14 @@ else
         170
       );
 
-    doc.text(
-      feedbackLines,
-      20,
-      y
-    );
+    feedbackLines.forEach((line) => {
+      if (y > 280) {
+        doc.addPage();
+        y = 20;
+      }
+      doc.text(line, 20, y);
+      y += 7;
+    });
 
     doc.save(
       "Interview_Report.pdf"
@@ -173,6 +184,8 @@ else
 
   };
 const generateCertificate = () => {
+
+  const candidateName = currentUser?.name || "Interview Candidate";
 
   const doc = new jsPDF(
     "landscape"
@@ -187,14 +200,14 @@ const generateCertificate = () => {
   if (score >= 90) {
 
     achievement =
-      "Outstanding Performance 🏅";
+      "Outstanding Performance";
 
   } else if (
     score >= 75
   ) {
 
     achievement =
-      "Excellent Performance ⭐";
+      "Excellent Performance";
   }
 
   doc.setFontSize(28);
@@ -216,9 +229,10 @@ const generateCertificate = () => {
   doc.setFontSize(24);
 
   doc.text(
-    "Interview Candidate",
-    105,
-    90
+    candidateName,
+    148,
+    90,
+    { align: "center" }
   );
 
   doc.setFontSize(16);
@@ -264,7 +278,7 @@ const generateCertificate = () => {
 const savedRef = useRef(false);
 useEffect(() => {
 
-  if (savedRef.current) return;
+  if (savedRef.current || !feedback) return;
 
   savedRef.current = true;
 
@@ -291,20 +305,16 @@ useEffect(() => {
           }
         );
 
-        console.log(
-          "Interview Saved"
-        );
+      } catch {
 
-      } catch (err) {
-
-        console.log(err);
+        toast.error("Could not save this interview to your history.");
 
       }
     };
 
   saveInterview();
 
-}, []);
+}, [feedback, score]);
   return (
     <div className="container fade-in">
       <h1>

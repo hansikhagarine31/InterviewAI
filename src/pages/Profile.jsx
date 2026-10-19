@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react";
-import api from "../api/client";
+import api, { getStoredUser } from "../api/client";
 import toast from "react-hot-toast";
 function Profile() {
 
-    const user =
-    JSON.parse(
-      localStorage.getItem("user")
-    );
+  const user = getStoredUser() || {};
   const [stats, setStats] =
     useState(null);
     const [showUsernameModal, setShowUsernameModal] = useState(false);
@@ -21,14 +18,18 @@ const [newPassword, setNewPassword] =
 
 const [confirmPassword, setConfirmPassword] =
   useState("");
-const [newUsername, setNewUsername] = useState(user.name);
+const [newUsername, setNewUsername] = useState(user.name || "");
 const [passwordMessage, setPasswordMessage] =
   useState("");
 
 const [passwordMessageColor, setPasswordMessageColor] =
   useState("red");
 
+  const userId = user.id;
+
   useEffect(() => {
+
+    if (!userId) return;
 
     const fetchProfile =
       async () => {
@@ -37,7 +38,7 @@ const [passwordMessageColor, setPasswordMessageColor] =
 
           const res =
             await api.get(
-              `/profile/${user.id}`
+              `/profile/${userId}`
             );
 
           setStats(res.data);
@@ -52,7 +53,7 @@ const [passwordMessageColor, setPasswordMessageColor] =
 
     fetchProfile();
 
-  }, []);
+  }, [userId]);
 
 const saveUsername = async () => {
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import api from "../api/client";
+import api, { getStoredUser } from "../api/client";
 import toast from "react-hot-toast";
 function History() {
 
@@ -24,8 +24,8 @@ function History() {
   const selectAll = () => {
 
     setSelectedItems(
-      history.map(
-        (_, index) => index
+      filteredHistory.map(
+        (item) => item.id
       )
     );
   };
@@ -45,12 +45,7 @@ function History() {
 
   try {
 
-    const user =
-      JSON.parse(
-        localStorage.getItem(
-          "user"
-        )
-      );
+    const user = getStoredUser();
 
     await api.delete(
       `/clear-history/${user.id}`
@@ -60,9 +55,9 @@ function History() {
 
     setSelectedItems([]);
 
-  } catch (err) {
+  } catch {
 
-    console.log(err);
+    toast.error("Failed to clear history.");
 
   }
 };
@@ -74,30 +69,17 @@ function History() {
 
       try {
 
-        const user =
-          JSON.parse(
-            localStorage.getItem(
-              "user"
-            )
-          );
-          console.log(
-  "Current User:",
-  user
-);
+        const user = getStoredUser();
         const res =
           await api.get(
             `/user-history/${user.id}`
           );
-          console.log(
-  "DB History:",
-  res.data
-);
 
         setHistory(res.data);
 
-      } catch (err) {
+      } catch {
 
-        console.log(err);
+        toast.error("Failed to load history.");
 
       }
     };
@@ -106,10 +88,6 @@ function History() {
 
 }, []);
 
-console.log(
-  "History state:",
-  history
-);
 const deleteSelected = async () => {
 
   if (selectedItems.length === 0) {
@@ -121,9 +99,9 @@ const deleteSelected = async () => {
   try {
 
     const selectedInterviews =
-      filteredHistory.filter(
-        (_, index) =>
-          selectedItems.includes(index)
+      history.filter(
+        (item) =>
+          selectedItems.includes(item.id)
       );
 
     for (
@@ -149,9 +127,9 @@ const deleteSelected = async () => {
 
     setSelectedItems([]);
 
-  } catch (err) {
+  } catch {
 
-    console.log(err);
+    toast.error("Failed to delete selected interviews.");
 
   }
 };
@@ -231,10 +209,10 @@ const deleteSelected = async () => {
         )
         : (
           filteredHistory.map(
-            (item, index) => (
+            (item) => (
 
               <div
-  key={index}
+  key={item.id}
   style={{
     display: "flex",
     alignItems: "flex-start",
@@ -246,27 +224,17 @@ const deleteSelected = async () => {
   <input
     type="checkbox"
     checked={
-      selectedItems.includes(index)
+      selectedItems.includes(item.id)
     }
     onChange={() => {
 
-      if (
-        selectedItems.includes(index)
-      ) {
-
-        setSelectedItems(
-          selectedItems.filter(
-            (i) => i !== index
-          )
-        );
-
-      } else {
-
-        setSelectedItems([
-          ...selectedItems,
-          index
-        ]);
-      }
+      setSelectedItems(
+        selectedItems.includes(item.id)
+          ? selectedItems.filter(
+              (i) => i !== item.id
+            )
+          : [...selectedItems, item.id]
+      );
     }}
     style={{
       width: "24px",
@@ -285,7 +253,7 @@ const deleteSelected = async () => {
 
     <h3>
       Interview #
-      {history.length - index}
+      {history.length - history.indexOf(item)}
     </h3>
 
     <p>

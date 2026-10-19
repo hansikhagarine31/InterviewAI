@@ -1,5 +1,6 @@
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { getStoredUser } from "../api/client";
 
 function Navbar() {
   const location = useLocation();
@@ -7,17 +8,11 @@ function Navbar() {
   const [darkMode, setDarkMode] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // Close the mobile menu whenever the route changes
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [location.pathname]);
-
   if (location.pathname === "/login" || location.pathname === "/register") {
     return null;
   }
 
-  const userData = localStorage.getItem("user");
-  const user = userData && userData !== "undefined" ? JSON.parse(userData) : null;
+  const user = getStoredUser();
 
   const toggleTheme = () => {
     document.body.classList.toggle("light-mode");
@@ -46,7 +41,10 @@ function Navbar() {
         {menuOpen ? "✕" : "☰"}
       </button>
 
-      <div className={`nav-links ${menuOpen ? "open" : ""}`}>
+      <div
+        className={`nav-links ${menuOpen ? "open" : ""}`}
+        onClick={() => setMenuOpen(false)}
+      >
         <NavLink to="/" end className={navLinkClass}>
           Home
         </NavLink>

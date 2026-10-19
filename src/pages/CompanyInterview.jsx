@@ -16,6 +16,8 @@ function CompanyInterview() {
     setLoadingInsights] =
     useState(false);
 
+  const [starting, setStarting] = useState(false);
+
   const [role, setRole] =
     useState("Software Engineer");
 
@@ -89,6 +91,12 @@ function CompanyInterview() {
 
       const data = response.data.insights;
 
+      if (!data || typeof data === "string") {
+        setInsights("");
+        toast.error("No insights available for this company");
+        return;
+      }
+
 setInsights(`
 Interview Rounds:
 ${data.rounds.map(r => `• ${r}`).join("\n")}
@@ -102,9 +110,10 @@ Tip:
 
     } catch (error) {
 
-      console.log(error);
-
-      toast.error("Failed to fetch company insights");
+      toast.error(
+        error.response?.data?.error ||
+        "Failed to fetch company insights"
+      );
 
     } finally {
 
@@ -123,6 +132,8 @@ Tip:
     }
 
     try {
+
+      setStarting(true);
 
       const response =
         await api.post(
@@ -163,9 +174,12 @@ Tip:
 
     } catch (error) {
 
-      console.log(error);
-
-      toast.error("Failed to generate questions");
+      toast.error(
+        error.response?.data?.error ||
+        "Failed to generate questions"
+      );
+    } finally {
+      setStarting(false);
     }
   };
   const filteredCompanies =
@@ -437,11 +451,12 @@ Tip:
         <button
           className="submit-btn"
           onClick={startInterview}
+          disabled={starting}
           style={{
             marginTop: "25px"
           }}
         >
-          Start Interview
+          {starting ? "Generating questions..." : "Start Interview"}
         </button>
 
       </div>

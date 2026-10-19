@@ -1,13 +1,14 @@
 import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, g
+from functools import wraps
+import secrets
+from markupsafe import escape
+import re
 from pypdf import PdfReader
 from flask_cors import CORS
 import os
 app = Flask(__name__)
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from google import genai
@@ -16,9 +17,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 import jwt
 import datetime
-import random
 import time
-import traceback
 load_dotenv()
 
 # Restrict CORS to known frontend origin(s) in production.
@@ -93,6 +92,71 @@ class Interview(db.Model):
 client = genai.Client(
     api_key=os.getenv("GEMINI_API_KEY")
 )
+def utcnow():
+    return datetime.datetime.now(datetime.timezone.utc)
+
+
+def make_token(user):
+    return jwt.encode(
+        {"user_id": user.id, "exp": utcnow() + datetime.timedelta(days=7)},
+        app.config["SECRET_KEY"],
+        algorithm="HS256"
+    )
+
+
+def auth_required(f):
+    """Require a valid Bearer token; sets g.user_id."""
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        header = request.headers.get("Authorization", "")
+        if not header.startswith("Bearer "):
+            return jsonify({"error": "Authentication required."}), 401
+        try:
+            payload = jwt.decode(
+                header[7:], app.config["SECRET_KEY"], algorithms=["HS256"]
+            )
+        except jwt.PyJWTError:
+            return jsonify({"error": "Invalid or expired token."}), 401
+        g.user_id = payload["user_id"]
+        return f(*args, **kwargs)
+    return wrapper
+
+
+def forbidden_unless_self(user_id):
+    if user_id != g.user_id:
+        return jsonify({"error": "Forbidden."}), 403
+    return None
+
+
+def password_error(password):
+    if len(password) < 8:
+        return "Password must contain at least 8 characters."
+    if not (any(c.isupper() for c in password)
+            and any(c.islower() for c in password)
+            and any(c.isdigit() for c in password)):
+        return "Password must contain uppercase, lowercase and a number."
+    return None
+
+
+def parse_questions(text, limit=None):
+    questions = []
+    for line in text.splitlines():
+        line = re.sub(r"^\s*(?:[-*•]|\d+[.)])\s*", "", line).strip()
+        if line:
+            questions.append(line)
+    return questions[:limit] if limit else questions
+
+
+def generate_text(prompt):
+    try:
+        return client.models.generate_content(
+            model="gemini-2.5-flash", contents=prompt
+        ).text
+    except Exception:
+        return client.models.generate_content(
+            model="gemini-2.5-flash-lite", contents=prompt
+        ).text
+
 company_data = {
 
     "Google": {
@@ -584,111 +648,56 @@ company_data = {
 }
 @app.route("/register", methods=["POST"])
 def register():
+    data = request.get_json(silent=True) or {}
+    name = (data.get("name") or "").strip()
+    email = (data.get("email") or "").strip().lower()
+    password = data.get("password") or ""
 
-    try:
+    if not name or not email or "@" not in email:
+        return jsonify({"error": "Name and a valid email are required."}), 400
 
-        data = request.json
+    error = password_error(password)
+    if error:
+        return jsonify({"error": error}), 400
 
-        name = data.get("name")
-        email = data.get("email")
-        password = data.get("password")
+    if User.query.filter_by(email=email).first():
+        return jsonify({"error": "Email already exists"}), 400
 
-        existing_user = User.query.filter_by(
-            email=email
-        ).first()
+    user = User(
+        name=name,
+        email=email,
+        password=bcrypt.generate_password_hash(password).decode("utf-8")
+    )
+    db.session.add(user)
+    db.session.commit()
 
-        if existing_user:
-            return jsonify({
-                "error": "Email already exists"
-            }), 400
+    return jsonify({"message": "User registered successfully"})
 
-        hashed_password = bcrypt.generate_password_hash(
-            password
-        ).decode("utf-8")
 
-        user = User(
-            name=name,
-            email=email,
-            password=hashed_password
-        )
-
-        db.session.add(user)
-        db.session.commit()
-
-        return jsonify({
-            "message": "User registered successfully"
-        })
-
-    except Exception as e:
-
-        return jsonify({
-            "error": str(e)
-        }), 500
 @app.route("/login", methods=["POST"])
 def login():
+    data = request.get_json(silent=True) or {}
+    email = (data.get("email") or "").strip().lower()
+    password = data.get("password") or ""
 
-    try:
+    user = User.query.filter_by(email=email).first()
 
-        data = request.json
+    if not user or not bcrypt.check_password_hash(user.password, password):
+        return jsonify({"error": "Invalid credentials"}), 401
 
-        email = data["email"]
-        password = data["password"]
+    return jsonify({
+        "token": make_token(user),
+        "user": {"id": user.id, "name": user.name, "email": user.email}
+    })
 
-        user = User.query.filter_by(
-            email=email
-        ).first()
 
-        if not user:
-
-            return jsonify({
-                "error":
-                "Invalid credentials"
-            }), 401
-
-        if not bcrypt.check_password_hash(
-            user.password,
-            password
-        ):
-
-            return jsonify({
-                "error":
-                "Invalid credentials"
-            }), 401
-
-        token = jwt.encode(
-            {
-                "user_id": user.id,
-                "exp":
-                datetime.datetime.utcnow()
-                + datetime.timedelta(days=7)
-            },
-            app.config["SECRET_KEY"],
-            algorithm="HS256"
-        )
-
-        return jsonify({
-            "token": token,
-            "user": {
-        "id": user.id,
-        "name": user.name,
-        "email": user.email
-    }
-        })
-
-    except Exception as e:
-
-        return jsonify({
-            "error": str(e)
-        }), 500
 @app.route("/evaluate", methods=["POST"])
+@auth_required
 def evaluate():
-
     try:
-
-        data = request.json
+        data = request.get_json(silent=True) or {}
         answers = data.get("answers", [])
-        image = data.get("image")
-        
+
         prompt_text = f"""
 You are a professional interviewer.
 
@@ -722,134 +731,74 @@ SUGGESTIONS:
 
 Be strict.
 """
-
-        try:
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=prompt_text
-            )
-        except Exception:
-            response = client.models.generate_content(
-                model="gemini-2.5-flash-lite",
-                contents=prompt_text
-            )
-
-        return jsonify({
-            "feedback": response.text
-        })
+        return jsonify({"feedback": generate_text(prompt_text)})
 
     except Exception as e:
-
-
-        return jsonify({
-            "error":
-    str(e)
-        }), 500
+        return jsonify({"error": str(e)}), 500
 
 
 # ---------------- RESUME UPLOAD ----------------
 
 @app.route("/upload-resume", methods=["POST"])
+@auth_required
 def upload_resume():
-
     try:
-
-        print("Content-Type:", request.content_type)
-        print("Files:", request.files)
-        print("Form:", request.form)
-
         file = request.files.get("resume")
 
         if file is None:
-            return jsonify({
-                "error": "Resume file not received."
-            }), 400
+            return jsonify({"error": "Resume file not received."}), 400
 
         reader = PdfReader(file)
 
         resume_text = ""
-
         for page in reader.pages:
             text = page.extract_text()
-
             if text:
                 resume_text += text + "\n"
 
+        if not resume_text.strip():
+            return jsonify({
+                "error": "Could not read any text from this PDF."
+            }), 400
+
         prompt_text = f"""
-        Analyze this resume:
+Analyze this resume:
 
-        {resume_text}
+{resume_text}
 
-        Generate exactly 5 interview questions based on:
-        - Skills
-        - Projects
-        - Technologies
+Generate exactly 5 interview questions based on:
+- Skills
+- Projects
+- Technologies
 
-        Return ONLY the questions.
-        """
+Return ONLY the questions, one per line, no numbering.
+"""
+        questions = parse_questions(generate_text(prompt_text), 5)
 
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt_text
-        )
-
-        questions = [
-            q.strip()
-            for q in response.text.split("\n")
-            if q.strip()
-        ]
-
-        
-
-        return jsonify({
-            "questions": questions
-        })
+        return jsonify({"questions": questions})
 
     except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-        
-
-        return jsonify({
-            "error": str(e)
-        }), 500
 
 @app.route("/generate-questions", methods=["POST"])
+@auth_required
 def generate_questions():
-
     try:
+        data = request.get_json(silent=True) or {}
 
-        data = request.json
+        interview_mode = data.get("interviewMode", "General")
+        company = data.get("company", "")
+        role = data.get("role", "")
+        interview_type = data.get("interviewType")
+        difficulty = data.get("difficulty")
+        topics = data.get("topics", [])
 
-        interview_mode = data.get(
-            "interviewMode",
-            "General"
-        )
+        try:
+            question_count = max(1, min(int(data.get("questionCount") or 5), 30))
+        except (TypeError, ValueError):
+            question_count = 5
 
-        company = data.get(
-            "company",
-            ""
-        )
-
-        role = data.get(
-            "role",
-            ""
-        )
-
-        interview_type = data.get(
-            "interviewType"
-        )
-
-        difficulty = data.get(
-            "difficulty"
-        )
-
-        question_count = data.get(
-            "questionCount"
-        )
-        topics = data.get(
-    "topics",
-    []
-)
         prompt_text = f"""
 You are a senior interviewer.
 
@@ -883,12 +832,6 @@ If Interview Mode is Company Specific:
 Generate realistic interview questions
 for {company} hiring a {role}.
 
-Focus Area:
-{interview_type}
-
-Difficulty:
-{difficulty}
-
 Mix company-specific behavioral,
 technical and role-related questions.
 
@@ -900,344 +843,225 @@ One question per line.
 
 No explanations.
 """
+        questions = parse_questions(generate_text(prompt_text), question_count)
 
-        try:
-           response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=prompt_text
-        )
-        except Exception:
-            response = client.models.generate_content(
-                model="gemini-2.5-flash-lite",
-                contents=prompt_text
-        )
-
-        questions = [
-            q.strip()
-            for q in response.text.split("\n")
-            if q.strip()
-        ]
-
-        return jsonify({
-            "questions": questions
-        })
+        return jsonify({"questions": questions})
 
     except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
-        return jsonify({
-            "error": str(e)
-        }), 500
 @app.route("/company-insights", methods=["POST"])
+@auth_required
 def company_insights():
-
-    data = request.json
-
-    company = data.get("company")
-
-    info = company_data.get(company)
+    data = request.get_json(silent=True) or {}
+    info = company_data.get(data.get("company"))
 
     if not info:
+        return jsonify({"error": "No company data available."}), 404
 
-        return jsonify({
-            "insights":
-            "No company data available."
-        })
+    return jsonify({"insights": info})
 
-    return jsonify({
-        "insights": info
-    })
-@app.route(
-    "/save-interview",
-    methods=["POST"]
-)
+
+@app.route("/save-interview", methods=["POST"])
+@auth_required
 def save_interview():
+    data = request.get_json(silent=True) or {}
 
-    data = request.json
-    
+    try:
+        score = int(data.get("score", 0))
+    except (TypeError, ValueError):
+        score = 0
+
     interview = Interview(
-        user_id=data["user_id"],
-        date=data["date"],
-        score=data["score"],
-        feedback=data["feedback"]
+        user_id=g.user_id,
+        date=data.get("date") or utcnow().isoformat(),
+        score=score,
+        feedback=data.get("feedback", "")
     )
 
     db.session.add(interview)
     db.session.commit()
 
-    return jsonify({
-        "message": "saved"
-    })
-@app.route(
-    "/history/<int:user_id>"
-)
-def get_history(user_id):
+    return jsonify({"message": "saved", "id": interview.id})
 
+
+def serialize_history(user_id):
     interviews = Interview.query.filter_by(
         user_id=user_id
-    ).all()
+    ).order_by(Interview.id.desc()).all()
 
-    result = []
-
-    for i in interviews:
-
-        result.append({
+    return [
+        {
             "id": i.id,
             "date": i.date,
             "score": i.score,
             "feedback": i.feedback
-        })
+        }
+        for i in interviews
+    ]
 
-    return jsonify(result)
+
+@app.route("/history/<int:user_id>")
+@auth_required
+def get_history(user_id):
+    denied = forbidden_unless_self(user_id)
+    if denied:
+        return denied
+    return jsonify(serialize_history(user_id))
+
+
 @app.route("/user-history/<int:user_id>")
+@auth_required
 def user_history(user_id):
+    denied = forbidden_unless_self(user_id)
+    if denied:
+        return denied
+    return jsonify(serialize_history(user_id))
 
-    interviews = Interview.query.filter_by(
-        user_id=user_id
-    ).all()
 
-   
-
-    result = []
-
-    for interview in interviews:
-
-        
-
-        result.append({
-            "id": interview.id,
-            "date": interview.date,
-            "score": interview.score,
-            "feedback": interview.feedback
-        })
-
-    
-
-    return jsonify(result)
-@app.route(
-    "/delete-interview/<int:id>",
-    methods=["DELETE"]
-)
+@app.route("/delete-interview/<int:id>", methods=["DELETE"])
+@auth_required
 def delete_interview(id):
+    interview = db.session.get(Interview, id)
 
-    interview =Interview.query.get(id)
+    if not interview or interview.user_id != g.user_id:
+        return jsonify({"error": "Interview not found."}), 404
 
-    if interview:
-
-        db.session.delete(interview)
-        db.session.commit()
-
-    return jsonify({
-        "message": "deleted"
-    })
-@app.route("/delete-all-history")
-def delete_all_history():
-
-    Interview.query.delete()
-
+    db.session.delete(interview)
     db.session.commit()
 
-    return "deleted"
+    return jsonify({"message": "deleted"})
 
-@app.route(
-    "/clear-history/<int:user_id>",
-    methods=["DELETE"]
-)
+
+@app.route("/clear-history/<int:user_id>", methods=["DELETE"])
+@auth_required
 def clear_history(user_id):
+    denied = forbidden_unless_self(user_id)
+    if denied:
+        return denied
 
-    
-
-    Interview.query.filter_by(
-        user_id=user_id
-    ).delete()
-
+    Interview.query.filter_by(user_id=user_id).delete()
     db.session.commit()
 
-    return jsonify({
-        "message": "History cleared"
-    })
+    return jsonify({"message": "History cleared"})
+
+
 @app.route("/profile/<int:user_id>")
+@auth_required
 def profile(user_id):
+    denied = forbidden_unless_self(user_id)
+    if denied:
+        return denied
 
-    interviews = Interview.query.filter_by(
-        user_id=user_id
-    ).all()
-
-    total = len(interviews)
-
-    best = 0
-    average = 0
-
-    if total > 0:
-
-        scores = [
-            i.score
-            for i in interviews
-        ]
-
-        best = max(scores)
-
-        average = round(
-            sum(scores) / total,
-            1
-        )
+    scores = [
+        i.score or 0
+        for i in Interview.query.filter_by(user_id=user_id).all()
+    ]
+    total = len(scores)
 
     return jsonify({
         "total": total,
-        "best": best,
-        "average": average
+        "best": max(scores) if scores else 0,
+        "average": round(sum(scores) / total, 1) if total else 0
     })
-@app.route(
-    "/update-profile",
-    methods=["PUT"]
-)
+
+
+@app.route("/update-profile", methods=["PUT"])
+@auth_required
 def update_profile():
+    data = request.get_json(silent=True) or {}
 
-    data = request.json
-    
-    user = User.query.get(
-        data["user_id"]
-    )
-
+    user = db.session.get(User, g.user_id)
     if not user:
+        return jsonify({"error": "User not found"}), 404
 
-        return jsonify({
-            "error": "User not found"
-        }), 404
+    name = (data.get("name") or "").strip()
+    if not name:
+        return jsonify({"error": "Name is required."}), 400
+    user.name = name
 
-    user.name = data["name"]
-
-    if (
-        "password" in data and
-        data["password"] != ""
-    ):
-
-        
-
+    if data.get("password"):
+        error = password_error(data["password"])
+        if error:
+            return jsonify({"error": error}), 400
         user.password = bcrypt.generate_password_hash(
             data["password"]
         ).decode("utf-8")
 
-        
-
     db.session.commit()
 
-    return jsonify({
-        "message": "Profile updated"
-    })
-@app.route(
-    "/change-username",
-    methods=["PUT"]
-)
+    return jsonify({"message": "Profile updated"})
+
+
+@app.route("/change-username", methods=["PUT"])
+@auth_required
 def change_username():
+    data = request.get_json(silent=True) or {}
 
-    data = request.json
-
-    user = User.query.get(
-        data["user_id"]
-    )
-
+    user = db.session.get(User, g.user_id)
     if not user:
+        return jsonify({"error": "User not found"}), 404
 
+    username = (data.get("username") or "").strip()
+    if len(username) < 3:
         return jsonify({
-            "error": "User not found"
-        }), 404
+            "error": "Username must contain at least 3 characters."
+        }), 400
 
-    user.name = data["username"]
-
+    user.name = username
     db.session.commit()
 
-    return jsonify({
-        "message": "Username updated"
-    })
-@app.route(
-    "/change-password",
-    methods=["PUT"]
-)
+    return jsonify({"message": "Username updated"})
+
+
+@app.route("/change-password", methods=["PUT"])
+@auth_required
 def change_password():
+    data = request.get_json(silent=True) or {}
 
-    data = request.json
-
-    user = User.query.get(
-        data["user_id"]
-    )
-
+    user = db.session.get(User, g.user_id)
     if not user:
+        return jsonify({"error": "User not found"}), 404
 
+    current_password = data.get("current_password") or ""
+    new_password = data.get("new_password") or ""
+
+    if not bcrypt.check_password_hash(user.password, current_password):
+        return jsonify({"error": "Current password is incorrect."}), 400
+
+    if new_password == current_password:
         return jsonify({
-            "error": "User not found"
-        }), 404
-
-    if not bcrypt.check_password_hash(
-        user.password,
-        data["current_password"]
-    ):
-
-        return jsonify({
-            "error": "Current password is incorrect."
+            "error": "New password must be different from the current password."
         }), 400
 
-    new_password = data["new_password"]
+    error = password_error(new_password)
+    if error:
+        return jsonify({"error": error}), 400
 
-    if len(new_password) < 8:
-
-        return jsonify({
-            "error":
-            "Password must contain at least 8 characters."
-        }), 400
-
-    if new_password == data["current_password"]:
-
-        return jsonify({
-            "error":
-            "New password must be different from the current password."
-        }), 400
-
-    has_upper = any(c.isupper() for c in new_password)
-    has_lower = any(c.islower() for c in new_password)
-    has_digit = any(c.isdigit() for c in new_password)
-
-    if not (
-        has_upper and
-        has_lower and
-        has_digit
-    ):
-
-        return jsonify({
-            "error":
-            "Password must contain uppercase, lowercase and a number."
-        }), 400
-
-    user.password = bcrypt.generate_password_hash(
-        new_password
-    ).decode("utf-8")
-
+    user.password = bcrypt.generate_password_hash(new_password).decode("utf-8")
     db.session.commit()
 
-    return jsonify({
-        "message":
-        "Password changed successfully."
-    })
+    return jsonify({"message": "Password changed successfully."})
+
+
 @app.route("/send-otp", methods=["POST"])
 def send_otp():
+    data = request.get_json(silent=True) or {}
+    email = (data.get("email") or "").strip().lower()
 
-    data = request.json
-
-    user = User.query.filter_by(
-        email=data["email"]
-    ).first()
+    user = User.query.filter_by(email=email).first()
 
     if not user:
-        return jsonify({
-            "error": "Email not found."
-        }), 404
+        return jsonify({"error": "Email not found."}), 404
 
-    otp = str(random.randint(100000, 999999))
+    otp = f"{secrets.randbelow(900000) + 100000}"
 
     otp_store[user.email] = {
         "otp": otp,
         "expires": time.time() + 300
     }
+
     try:
         configuration = sib_api_v3_sdk.Configuration()
         configuration.api_key["api-key"] = os.getenv("BREVO_API_KEY")
@@ -1249,12 +1073,14 @@ def send_otp():
         send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
             to=[{"email": user.email, "name": user.name}],
             sender={
-                "email": "hansikhagarine31@gmail.com",
+                "email": os.getenv(
+                    "MAIL_SENDER", "hansikhagarine31@gmail.com"
+                ),
                 "name": "InterviewAI"
             },
             subject="InterviewAI Password Reset OTP",
             html_content=f"""
-            <h2>Hello {user.name},</h2>
+            <h2>Hello {escape(user.name)},</h2>
 
             <p>Your OTP for resetting your password is:</p>
 
@@ -1272,161 +1098,94 @@ def send_otp():
 
         api_instance.send_transac_email(send_smtp_email)
 
-        return jsonify({
-            "message": "OTP sent successfully"
-        })
+        return jsonify({"message": "OTP sent successfully"})
 
-    except ApiException as e:
-        return jsonify({
-            "error": str(e)
-        }), 500
+    except Exception as e:
+        otp_store.pop(user.email, None)
+        return jsonify({"error": f"Could not send OTP email: {e}"}), 500
 
-@app.route(
-    "/reset-password",
-    methods=["POST"]
-)
+
+@app.route("/reset-password", methods=["POST"])
 def reset_password():
+    data = request.get_json(silent=True) or {}
 
-    data = request.json
+    email = (data.get("email") or "").strip().lower()
+    otp = str(data.get("otp") or "")
+    new_password = data.get("new_password") or ""
 
-    email = data["email"]
-    otp = data["otp"]
-    new_password = data["new_password"]
-    if email not in otp_store:
+    stored = otp_store.get(email)
 
-        return jsonify({
-            "error": "OTP not generated."
-        }), 400
-    stored = otp_store[email]
+    if not stored:
+        return jsonify({"error": "OTP not generated."}), 400
+
     if time.time() > stored["expires"]:
-
         del otp_store[email]
+        return jsonify({"error": "OTP expired."}), 400
 
-        return jsonify({
-            "error": "OTP expired."
-        }), 400
-    if stored["otp"] != otp:
+    if not secrets.compare_digest(stored["otp"], otp):
+        return jsonify({"error": "Invalid OTP."}), 400
 
-        return jsonify({
-            "error": "Invalid OTP."
-        }), 400
+    error = password_error(new_password)
+    if error:
+        return jsonify({"error": error}), 400
 
-    if len(new_password) < 8:
-
-        return jsonify({
-            "error":
-            "Password must contain at least 8 characters."
-        }), 400
-
-    has_upper = any(c.isupper() for c in new_password)
-    has_lower = any(c.islower() for c in new_password)
-    has_digit = any(c.isdigit() for c in new_password)
-
-    if not (
-        has_upper and
-        has_lower and
-        has_digit
-    ):
-
-        return jsonify({
-            "error":
-            "Password must contain an uppercase letter, lowercase letter and a number."
-        }), 400
-
-    user = User.query.filter_by(
-        email=email
-    ).first()
+    user = User.query.filter_by(email=email).first()
 
     if not user:
+        return jsonify({"error": "User not found."}), 404
 
-        return jsonify({
-            "error": "User not found."
-        }), 404
-
-    user.password = bcrypt.generate_password_hash(
-        new_password
-    ).decode("utf-8")
-
+    user.password = bcrypt.generate_password_hash(new_password).decode("utf-8")
     db.session.commit()
 
     del otp_store[email]
 
-    return jsonify({
-        "message":
-        "Password reset successful."
-    })
-@app.route(
-    "/google-login",
-    methods=["POST"]
-)
+    return jsonify({"message": "Password reset successful."})
+
+
+@app.route("/google-login", methods=["POST"])
 def google_login():
+    data = request.get_json(silent=True) or {}
+    credential = data.get("credential")
 
-    data = request.json
-
-    credential = data["credential"]
+    if not credential:
+        return jsonify({"error": "Missing Google credential."}), 400
 
     try:
-
         google_user = id_token.verify_oauth2_token(
-
             credential,
-
             requests.Request(),
-
             os.getenv("GOOGLE_CLIENT_ID")
-
         )
-
     except Exception:
+        return jsonify({"error": "Invalid Google token."}), 401
 
-        return jsonify({
-            "error": "Invalid Google token."
-        }), 401
+    if not google_user.get("email_verified", False):
+        return jsonify({"error": "Google email is not verified."}), 401
 
-    email = google_user["email"]
-    name = google_user["name"]
+    email = google_user["email"].lower()
+    name = google_user.get("name") or email.split("@")[0]
 
-    user = User.query.filter_by(
-        email=email
-    ).first()
+    user = User.query.filter_by(email=email).first()
 
     if not user:
-
-        random_password = bcrypt.generate_password_hash(
-            "google_login"
-        ).decode("utf-8")
-
+        # Random, unguessable password: Google users sign in via Google
+        # (or reset it through the OTP flow).
         user = User(
             name=name,
             email=email,
-            password=random_password
+            password=bcrypt.generate_password_hash(
+                secrets.token_urlsafe(32)
+            ).decode("utf-8")
         )
-
         db.session.add(user)
         db.session.commit()
 
-    token = jwt.encode(
-        {
-            "user_id": user.id,
-            "exp":
-            datetime.datetime.utcnow()
-            + datetime.timedelta(days=7)
-        },
-        app.config["SECRET_KEY"],
-        algorithm="HS256"
-    )
-
     return jsonify({
-
-        "token": token,
-
-        "user": {
-            "id": user.id,
-            "name": user.name,
-            "email": user.email
-        }
-
+        "token": make_token(user),
+        "user": {"id": user.id, "name": user.name, "email": user.email}
     })
+
+
 with app.app_context():
     db.create_all()
 

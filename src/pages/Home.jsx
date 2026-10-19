@@ -1,15 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import api from "../api/client";
+import api, { getStoredUser } from "../api/client";
 
 function Home() {
 
   const navigate = useNavigate();
 
-  const user =
-    JSON.parse(
-      localStorage.getItem("user")
-    );
+  const user = getStoredUser() || {};
 
   const [stats, setStats] =
     useState({
@@ -35,16 +32,14 @@ function Home() {
   ];
 
   const [tip] = useState(
-
-    tips[
-      Math.floor(
-        Math.random() * tips.length
-      )
-    ]
-
+    () => tips[Math.floor(Math.random() * tips.length)]
   );
 
+  const userId = user.id;
+
   useEffect(() => {
+
+    if (!userId) return;
 
     const fetchStats =
       async () => {
@@ -53,7 +48,7 @@ function Home() {
 
           const res =
             await api.get(
-              `/profile/${user.id}`
+              `/profile/${userId}`
             );
 
           setStats(res.data);
@@ -68,7 +63,7 @@ function Home() {
 
     fetchStats();
 
-  }, []);
+  }, [userId]);
 
   return (
 
