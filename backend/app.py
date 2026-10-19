@@ -1104,7 +1104,10 @@ def send_otp():
 
     except Exception as e:
         otp_store.pop(user.email, None)
-        return jsonify({"error": f"Could not send OTP email: {e}"}), 500
+        app.logger.error("OTP email failed: %s", e)
+        return jsonify({
+            "error": "Could not send the OTP email. Please try again later."
+        }), 500
 
 
 @app.route("/reset-password", methods=["POST"])

@@ -22,7 +22,7 @@ function ForgotPassword() {
       }
     );
 
-    toast.success("OTP generated. Check backend terminal.");
+    toast.success("OTP sent to your email. It is valid for 5 minutes.");
       
 
     setStep(2);
