@@ -82,6 +82,29 @@ function Dashboard() {
           ) / scores.length
         ).toFixed(1)
       : 0;
+  const axisColor = "#8b92ad";
+
+  const gridColor = "rgba(139,146,173,0.18)";
+
+  const chartOptions = {
+    responsive: true,
+    scales: {
+      y: {
+        min: 0,
+        max: 100,
+        ticks: { color: axisColor, stepSize: 20 },
+        grid: { color: gridColor },
+      },
+      x: {
+        ticks: { color: axisColor },
+        grid: { color: gridColor },
+      },
+    },
+    plugins: {
+      legend: { display: false },
+    },
+  };
+
     const chartData = {
   labels: history.map(
     (_, index) =>
@@ -97,10 +120,20 @@ function Dashboard() {
           Number(item.score)
       ),
 
-      borderColor: "#00d4ff",
+      borderColor: "#7c6cff",
+
+      pointBackgroundColor: "#2dd4bf",
+
+      pointBorderColor: "#2dd4bf",
+
+      pointRadius: 5,
+
+      pointHoverRadius: 7,
+
+      fill: true,
 
       backgroundColor:
-        "rgba(0,212,255,0.2)",
+        "rgba(124,108,255,0.18)",
 
       tension: 0.4,
     },
@@ -295,42 +328,7 @@ averageScore >= 60
     Performance Trend
   </h2>
 
-  <Line
-  data={chartData}
-  options={{
-
-    responsive: true,
-
-    plugins: {
-
-      legend: {
-
-        display: false
-
-      }
-
-    },
-
-    scales: {
-
-      y: {
-
-        min: 0,
-
-        max: 100,
-
-        ticks: {
-
-          stepSize: 20
-
-        }
-
-      }
-
-    }
-
-  }}
-/>
+  <Line data={chartData} options={chartOptions} />
 </div>
       {
 

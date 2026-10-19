@@ -23,7 +23,7 @@ const [passwordMessage, setPasswordMessage] =
   useState("");
 
 const [passwordMessageColor, setPasswordMessageColor] =
-  useState("red");
+  useState("var(--color-danger)");
 
   const userId = user.id;
 
@@ -130,7 +130,7 @@ const changePassword = async () => {
       }
     );
 
-    setPasswordMessageColor("limegreen");
+    setPasswordMessageColor("var(--color-success)");
 
 setPasswordMessage(
   "Password updated successfully!"
@@ -146,7 +146,7 @@ setPasswordMessage(
 
   } catch (err) {
 
-  setPasswordMessageColor("red");
+  setPasswordMessageColor("var(--color-danger)");
 
   setPasswordMessage(
 
@@ -165,95 +165,56 @@ setPasswordMessage(
       <h1>
         My Profile
       </h1>
-        <div
-  style={{
-    textAlign: "center",
-    marginBottom: "30px"
-  }}
->
+      <div className="question-box profile-card">
 
-  <div
-    style={{
-      width: "120px",
-      height: "120px",
-      borderRadius: "50%",
-      background:
-        "linear-gradient(135deg,#3b82f6,#06b6d4)",
-      margin: "auto",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      fontSize: "50px",
-      fontWeight: "bold"
-    }}
-  >
-    {newUsername[0]}
-  </div>
+        <div className="avatar">
+          {(newUsername || "?")[0]}
+        </div>
 
-  
+        <div className="profile-info">
 
-</div>
-      <div className="question-box">
+          <h2>{newUsername}</h2>
 
-        <h2>
-          👤 {newUsername}
-        </h2>
+          <p>📧 {user.email}</p>
 
-        <p>
-          📧 {user.email}
-        </p>
-    <div
-  style={{
-    marginTop: "25px",
-    display: "flex",
-    justifyContent: "center",
-    gap: "15px",
-    flexWrap: "wrap"
-  }}
->
+          <span className="chip chip-primary" style={{ marginTop: "10px" }}>
+            Level:
+            {
+              stats?.total >= 20
+                ? " Expert"
+                : stats?.total >= 10
+                ? " Advanced"
+                : stats?.total >= 5
+                ? " Intermediate"
+                : " Beginner"
+            }
+          </span>
 
-  <button
-  className="submit-btn"
-  onClick={() => setShowUsernameModal(true)}
->
-  ✏️ Change Username
-</button>
+        </div>
 
-  <button
-  className="submit-btn"
-  onClick={() => {
+        <div className="btn-row">
 
-  setPasswordMessage("");
+          <button
+            className="submit-btn"
+            onClick={() => setShowUsernameModal(true)}
+          >
+            ✏️ Change Username
+          </button>
 
-  setCurrentPassword("");
+          <button
+            className="submit-btn btn-secondary"
+            onClick={() => {
+              setPasswordMessage("");
+              setCurrentPassword("");
+              setNewPassword("");
+              setConfirmPassword("");
+              setShowPasswordModal(true);
+            }}
+          >
+            🔒 Change Password
+          </button>
 
-  setNewPassword("");
-
-  setConfirmPassword("");
-
-  setShowPasswordModal(true);
-
-}}
->
-  🔒 Change Password
-</button>
-
-</div>
-    <p>
-
-    Level:
-
-    {
-      stats?.total >= 20
-        ? " Expert"
-        : stats?.total >= 10
-        ? " Advanced"
-        : stats?.total >= 5
-        ? " Intermediate"
-        : " Beginner"
-    }
-
-  </p>
+        </div>
 
       </div>
 

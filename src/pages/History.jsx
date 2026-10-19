@@ -161,38 +161,31 @@ const deleteSelected = async () => {
         }}
       />
 
-      <div
-        style={{
-          display: "flex",
-          gap: "10px",
-          flexWrap: "wrap",
-          marginBottom: "20px"
-        }}
-      >
+      <div className="btn-row">
 
         <button
-          className="submit-btn"
+          className="submit-btn btn-secondary"
           onClick={selectAll}
         >
           Select All
         </button>
 
         <button
-          className="submit-btn"
+          className="submit-btn btn-secondary"
           onClick={deselectAll}
         >
           Deselect All
         </button>
 
         <button
-          className="submit-btn"
+          className="submit-btn btn-danger"
           onClick={deleteSelected}
         >
           Delete Selected
         </button>
 
         <button
-          className="submit-btn"
+          className="submit-btn btn-danger"
           onClick={clearHistory}
         >
           Clear History
@@ -213,16 +206,12 @@ const deleteSelected = async () => {
 
               <div
   key={item.id}
-  style={{
-    display: "flex",
-    alignItems: "flex-start",
-    gap: "15px",
-    marginBottom: "20px"
-  }}
+  className="history-item"
 >
 
   <input
     type="checkbox"
+    aria-label="Select interview"
     checked={
       selectedItems.includes(item.id)
     }
@@ -236,43 +225,40 @@ const deleteSelected = async () => {
           : [...selectedItems, item.id]
       );
     }}
-    style={{
-      width: "24px",
-      height: "24px",
-      marginTop: "25px",
-      cursor: "pointer"
-    }}
   />
 
-  <div
-    className="question-box"
-    style={{
-      flex: 1
-    }}
-  >
+  <div className="question-box">
 
-    <h3>
-      Interview #
-      {history.length - history.indexOf(item)}
-    </h3>
+    <div className="history-head">
 
-    <p>
-      📅 {item.date}
-    </p>
+      <div>
+        <h3>
+          Interview #
+          {history.length - history.indexOf(item)}
+        </h3>
+        <p className="history-date">
+          📅 {item.date}
+        </p>
+      </div>
 
-    <p>
-      🏆 Score:
-      {item.score}/100
-    </p>
+      <span
+        className={`score-badge ${
+          item.score >= 80
+            ? "high"
+            : item.score >= 60
+            ? "mid"
+            : "low"
+        }`}
+      >
+        {item.score}/100
+      </span>
 
-    <pre
-      style={{
-        whiteSpace:
-          "pre-wrap"
-      }}
-    >
-      {item.feedback}
-    </pre>
+    </div>
+
+    <details className="feedback-details">
+      <summary>View feedback</summary>
+      <pre>{item.feedback}</pre>
+    </details>
 
   </div>
 

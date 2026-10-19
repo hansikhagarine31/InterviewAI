@@ -68,11 +68,14 @@ function Login() {
   };
   
   return (
-    <div className="container fade-in">
+    <div className="container fade-in auth-page">
 
-      <div className="question-box">
+      <div className="question-box auth-card">
 
-        <h1>Login</h1>
+        <div className="auth-brand">🤖 InterviewAI</div>
+
+        <h1>Welcome back</h1>
+        <p className="auth-sub">Sign in to continue practicing.</p>
 
         <input
           placeholder="Email"
@@ -105,9 +108,9 @@ function Login() {
             "Login"
           )}
         </button>
+    <div className="auth-divider">or</div>
     <div
   style={{
-    marginTop: "20px",
     display: "flex",
     justifyContent: "center"
   }}
@@ -153,25 +156,13 @@ function Login() {
   />
 
 </div>
-          <p
-  style={{
-    marginTop: "15px",
-    textAlign: "center"
-  }}
->
-  <Link to="/forgot-password">
-    Forgot Password?
-  </Link>
-</p>
-        <p style={{marginTop:"20px"}}>
-
-          New User?
-
-          <Link to="/register">
-            Register
-          </Link>
-
-        </p>
+        <div className="auth-links">
+          <Link to="/forgot-password">Forgot password?</Link>
+          <span>
+            New here?
+            <Link to="/register">Create account</Link>
+          </span>
+        </div>
 
       </div>
 

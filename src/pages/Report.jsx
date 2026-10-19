@@ -10,6 +10,19 @@ import {
 
 import "react-circular-progressbar/dist/styles.css";
 
+const parseSection = (text, name) => {
+  const match = text.match(
+    new RegExp(name + ":\\s*([\\s\\S]*?)(?=\\n\\s*[A-Z_]{4,}:|$)", "i")
+  );
+
+  if (!match) return [];
+
+  return match[1]
+    .split("\n")
+    .map((line) => line.replace(/^\s*[-*•]\s*/, "").trim())
+    .filter(Boolean);
+};
+
 function Report() {
 
   const location = useLocation();
@@ -22,6 +35,10 @@ function Report() {
 
   const questions =
     location.state?.questions || [];
+
+  const strengths = parseSection(feedback, "STRENGTHS");
+  const weaknesses = parseSection(feedback, "WEAKNESSES");
+  const suggestions = parseSection(feedback, "SUGGESTIONS");
 
   const scoreMatch =
     feedback.match(/SCORE:\s*(\d+)/i) ||
@@ -321,23 +338,18 @@ useEffect(() => {
         Interview Report
       </h1>
 
-      <div
-        style={{
-          width: "220px",
-          margin: "30px auto",
-        }}
-      >
+      <div className="report-score">
         <CircularProgressbar
           value={score}
           text={`${score}/100`}
           styles={buildStyles({
             textSize: "12px",
             pathColor:
-              "#00d4ff",
+              "#7c6cff",
             textColor:
-              "#ffffff",
+              "var(--text-primary)",
             trailColor:
-              "#16213e",
+              "rgba(139,146,173,0.25)",
           })}
         />
       </div>
@@ -501,18 +513,30 @@ score >= 60 ?
   </h3>
 
 </div>
-      <div className="question-box">
-
-        <pre
-          style={{
-            whiteSpace:
-              "pre-wrap",
-          }}
-        >
-          {feedback}
-        </pre>
-
-      </div>
+      {strengths.length + weaknesses.length + suggestions.length > 0 ? (
+        <div className="feedback-grid">
+          {[
+            ["Strengths", "good", "✅", strengths],
+            ["Weaknesses", "bad", "⚠️", weaknesses],
+            ["Suggestions", "tip", "💡", suggestions],
+          ].map(([title, tone, icon, items]) => (
+            <div key={title} className={`question-box feedback-card ${tone}`}>
+              <h3>
+                {icon} {title}
+              </h3>
+              <ul>
+                {items.map((item, i) => (
+                  <li key={i}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="question-box">
+          <pre>{feedback}</pre>
+        </div>
+      )}
 
       <h2
         style={{

@@ -2,6 +2,7 @@ import { useState } from "react";
 import api from "../api/client";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { Link } from "react-router-dom";
 function ForgotPassword() {
     const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -88,9 +89,18 @@ navigate("/login");
 };
   return (
 
-    <div className="container fade-in">
+    <div className="container fade-in auth-page">
 
-      <h1>Forgot Password</h1>
+      <div className="question-box auth-card">
+
+      <div className="auth-brand">🤖 InterviewAI</div>
+
+      <h1>Reset password</h1>
+      <p className="auth-sub">
+        {step === 1
+          ? "Enter your email and we'll send you a one-time code."
+          : "Enter the code we emailed you and choose a new password."}
+      </p>
 
       {step === 1 && (
 
@@ -146,6 +156,12 @@ navigate("/login");
         </>
 
       )}
+
+      <div className="auth-links">
+        <Link to="/login">Back to login</Link>
+      </div>
+
+      </div>
 
     </div>
 

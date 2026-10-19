@@ -221,11 +221,22 @@ function Interview() {
   return (
     <div className="container fade-in">
       <h1>{interviewType}</h1>
-      <h3>Difficulty: {difficulty}</h3>
-      <h3>Questions: {questionCount}</h3>
-      <h3>
-        Question {currentQuestion + 1} of {questionCount}
-      </h3>
+
+      <div className="session-meta">
+        <span className="chip chip-primary">{difficulty}</span>
+        <span className="chip">
+          Question {currentQuestion + 1} of {questionCount}
+        </span>
+      </div>
+
+      <div className="session-bar">
+        <div className="timer-box">
+          ⏳ {Math.floor(timeLeft / 60)}:
+          {(timeLeft % 60).toString().padStart(2, "0")}
+        </div>
+        <p className="progress-text">{Math.round(progress)}% completed</p>
+      </div>
+
       <div className="progress-container">
         <div
           className="progress-bar"
@@ -233,20 +244,17 @@ function Interview() {
         ></div>
       </div>
 
-      <p className="progress-text">{Math.round(progress)}% Completed</p>
-      <div className="timer-box">
-        ⏳ Time Left: {Math.floor(timeLeft / 60)}:
-        {(timeLeft % 60).toString().padStart(2, "0")}
-      </div>
-      <Webcam
-        ref={webcamRef}
-        screenshotFormat="image/jpeg"
-        width={250}
-        height={180}
-        mirrored={true}
-      />
-      <div className="question-box">
-        <h2>{interviewQuestions[currentQuestion]}</h2>
+      <div className="interview-grid">
+        <Webcam
+          ref={webcamRef}
+          screenshotFormat="image/jpeg"
+          width={260}
+          height={195}
+          mirrored={true}
+        />
+        <div className="question-box">
+          <h2>{interviewQuestions[currentQuestion]}</h2>
+        </div>
       </div>
 
       <textarea
@@ -263,7 +271,10 @@ function Interview() {
           marginTop: "15px",
         }}
       >
-        <button className="submit-btn" onClick={toggleListening}>
+        <button
+          className="submit-btn btn-secondary"
+          onClick={toggleListening}
+        >
           {isListening ? "🛑 Stop Recording" : "🎤 Start Recording"}
         </button>
 
@@ -280,15 +291,9 @@ function Interview() {
         </button>
       </div>
 
-      <div
-        style={{
-          marginTop: "20px",
-          color: "#00ff88",
-          fontWeight: "bold",
-        }}
-      >
-        {isListening && "🎙️ Recording... Speak now"}
-      </div>
+      {isListening && (
+        <div className="recording-indicator">Recording... speak now</div>
+      )}
       {evaluating && (
         <div className="loading-overlay">
           <motion.div

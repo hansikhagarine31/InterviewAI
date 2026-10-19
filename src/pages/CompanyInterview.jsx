@@ -226,7 +226,7 @@ Tip:
 
         <button
           key={c}
-          className="company-chip"
+          className={`company-chip ${c === company ? "active" : ""}`}
           onClick={() => setCompany(c)}
         >
           {c}
@@ -253,7 +253,7 @@ Tip:
 
       <button
         key={c}
-        className="company-chip"
+        className={`company-chip ${c === company ? "active" : ""}`}
         onClick={() =>
           setCompany(c)
         }

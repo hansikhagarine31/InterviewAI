@@ -40,11 +40,16 @@ function Register() {
   };
 
   return (
-    <div className="container fade-in">
+    <div className="container fade-in auth-page">
 
-      <div className="question-box">
+      <div className="question-box auth-card">
 
-        <h1>Create Account</h1>
+        <div className="auth-brand">🤖 InterviewAI</div>
+
+        <h1>Create account</h1>
+        <p className="auth-sub">
+          Min. 8 characters with upper, lower case and a number.
+        </p>
 
         <input
           placeholder="Name"
@@ -86,15 +91,12 @@ function Register() {
           )}
         </button>
 
-        <p style={{marginTop:"20px"}}>
-
-          Already have account?
-
-          <Link to="/login">
-            Login
-          </Link>
-
-        </p>
+        <div className="auth-links">
+          <span>
+            Already have an account?
+            <Link to="/login">Log in</Link>
+          </span>
+        </div>
 
       </div>
 
