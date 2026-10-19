@@ -72,7 +72,10 @@ function Login() {
 
       <div className="question-box auth-card">
 
-        <div className="auth-brand">🤖 InterviewAI</div>
+        <div className="auth-brand">
+          <span className="logo-mark">AI</span>
+          InterviewAI
+        </div>
 
         <h1>Welcome back</h1>
         <p className="auth-sub">Sign in to continue practicing.</p>

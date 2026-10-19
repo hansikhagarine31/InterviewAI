@@ -29,7 +29,10 @@ function Navbar() {
 
   return (
     <nav className="navbar">
-      <div className="logo">🤖 InterviewAI</div>
+      <div className="logo">
+        <span className="logo-mark">AI</span>
+        Interview<span className="logo-accent">AI</span>
+      </div>
 
       <button
         type="button"
@@ -60,7 +63,12 @@ function Navbar() {
       </div>
 
       <div className="nav-actions">
-        {user && <span className="nav-user">👤 {user?.name}</span>}
+        {user && (
+          <span className="nav-user">
+            <span className="nav-avatar">{(user.name || "?")[0]}</span>
+            {user.name}
+          </span>
+        )}
 
         <button type="button" className="submit-btn" style={{ marginTop: 0 }} onClick={logout}>
           Logout

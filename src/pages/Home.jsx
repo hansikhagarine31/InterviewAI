@@ -99,6 +99,90 @@ function Home() {
 
       </div>
 
+      {/* Interview Modes */}
+
+      <h2 className="section-title">Start practicing</h2>
+
+      <div className="mode-container">
+
+        <div className="mode-card">
+
+          <span className="mode-icon">🤖</span>
+
+          <h2>General Interview</h2>
+
+          <p>
+
+            Practice HR, Java,
+            Python and DSA
+            interviews with AI.
+
+          </p>
+
+          <button
+            className="submit-btn"
+            onClick={() =>
+              navigate("/general")
+            }
+          >
+            Start Practice →
+          </button>
+
+        </div>
+
+        <div className="mode-card">
+
+          <span className="mode-icon">🏢</span>
+
+          <h2>Company Specific</h2>
+
+          <p>
+
+            Prepare for Google,
+            Amazon, Microsoft,
+            OpenAI and more.
+
+          </p>
+
+          <button
+            className="submit-btn"
+            onClick={() =>
+              navigate("/company")
+            }
+          >
+            Start Practice →
+          </button>
+
+        </div>
+
+        <div className="mode-card">
+
+          <span className="mode-icon">⭐</span>
+
+          <h2>Resume Based Interview</h2>
+
+          <p>
+
+            Upload your resume
+            and receive AI-generated
+            personalized interview questions.
+
+          </p>
+
+          <button
+            className="submit-btn"
+            onClick={() =>
+              navigate("/resume")
+            }
+          >
+            Start Practice →
+          </button>
+
+        </div>
+
+      </div>
+
+
       {/* Stats */}
 
       <div className="stats-container">
@@ -143,115 +227,11 @@ function Home() {
 
       {/* Daily Tip */}
 
-      <div
-        className="question-box"
-        style={{
-          marginBottom: "30px",
-          textAlign: "center"
-        }}
-      >
+      <div className="tip-banner">
 
-        <h2>
-          💡 Interview Tip of the Day
-        </h2>
+        <span className="tip-label">💡 Tip of the day</span>
 
-        <p
-          style={{
-            fontSize: "18px",
-            marginTop: "15px"
-          }}
-        >
-          {tip}
-        </p>
-
-      </div>
-
-      {/* Interview Modes */}
-
-      <div className="mode-container">
-
-        <div className="mode-card">
-
-          <h2>
-            🤖 General Interview
-          </h2>
-
-          <p>
-
-            Practice HR, Java,
-            Python and DSA
-            interviews with AI.
-
-          </p>
-
-          <button
-            className="submit-btn"
-            onClick={() =>
-              navigate("/general")
-            }
-          >
-            Start Practice →
-          </button>
-
-        </div>
-
-        <div className="mode-card">
-
-          <h2>
-            🏢 Company Specific
-          </h2>
-
-          <p>
-
-            Prepare for Google,
-            Amazon, Microsoft,
-            OpenAI and more.
-
-          </p>
-
-          <button
-            className="submit-btn"
-            onClick={() =>
-              navigate("/company")
-            }
-          >
-            Start Practice →
-          </button>
-
-        </div>
-
-        <div
-          className="mode-card"
-          style={{
-            border:
-              "2px solid #3b82f6"
-          }}
-        >
-
-          <h2>
-
-            ⭐ Resume Based Interview
-
-          </h2>
-
-          <p>
-
-            Upload your resume
-            and receive AI-generated
-            personalized interview questions.
-
-          </p>
-
-          <button
-            className="submit-btn"
-            onClick={() =>
-              navigate("/resume")
-            }
-          >
-            Start Practice →
-          </button>
-
-        </div>
+        <p>{tip}</p>
 
       </div>
 

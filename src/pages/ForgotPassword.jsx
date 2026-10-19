@@ -93,7 +93,10 @@ navigate("/login");
 
       <div className="question-box auth-card">
 
-      <div className="auth-brand">🤖 InterviewAI</div>
+      <div className="auth-brand">
+          <span className="logo-mark">AI</span>
+          InterviewAI
+        </div>
 
       <h1>Reset password</h1>
       <p className="auth-sub">

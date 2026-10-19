@@ -82,9 +82,9 @@ function Dashboard() {
           ) / scores.length
         ).toFixed(1)
       : 0;
-  const axisColor = "#8b92ad";
+  const axisColor = "#8a958d";
 
-  const gridColor = "rgba(139,146,173,0.18)";
+  const gridColor = "rgba(138,149,141,0.2)";
 
   const chartOptions = {
     responsive: true,
@@ -120,11 +120,11 @@ function Dashboard() {
           Number(item.score)
       ),
 
-      borderColor: "#7c6cff",
+      borderColor: "#34d399",
 
-      pointBackgroundColor: "#2dd4bf",
+      pointBackgroundColor: "#fbbf24",
 
-      pointBorderColor: "#2dd4bf",
+      pointBorderColor: "#fbbf24",
 
       pointRadius: 5,
 
@@ -133,7 +133,7 @@ function Dashboard() {
       fill: true,
 
       backgroundColor:
-        "rgba(124,108,255,0.18)",
+        "rgba(52,211,153,0.16)",
 
       tension: 0.4,
     },
