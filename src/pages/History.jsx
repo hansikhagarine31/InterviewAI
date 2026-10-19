@@ -237,7 +237,7 @@ const deleteSelected = async () => {
           {history.length - history.indexOf(item)}
         </h3>
         <p className="history-date">
-          📅 {item.date}
+          {item.date}
         </p>
       </div>
 

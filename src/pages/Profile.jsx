@@ -175,7 +175,7 @@ setPasswordMessage(
 
           <h2>{newUsername}</h2>
 
-          <p>📧 {user.email}</p>
+          <p>{user.email}</p>
 
           <span className="chip chip-primary" style={{ marginTop: "10px" }}>
             Level:
@@ -198,7 +198,7 @@ setPasswordMessage(
             className="submit-btn"
             onClick={() => setShowUsernameModal(true)}
           >
-            ✏️ Change Username
+            Change username
           </button>
 
           <button
@@ -211,7 +211,7 @@ setPasswordMessage(
               setShowPasswordModal(true);
             }}
           >
-            🔒 Change Password
+            Change password
           </button>
 
         </div>
@@ -259,30 +259,30 @@ setPasswordMessage(
 <div className="skills-section">
 
   <h2>
-    🏆 Achievements
+    Achievements
   </h2>
 
   {stats.total >= 1 && (
     <div className="question-box">
-      🎯 First Interview Completed
+      ✓ First interview completed
     </div>
   )}
 
   {stats.total >= 5 && (
     <div className="question-box">
-      🔥 5 Interviews Completed
+      ✓ 5 interviews completed
     </div>
   )}
 
   {stats.best >= 80 && (
     <div className="question-box">
-      ⭐ Score Above 80
+      ✓ Score above 80
     </div>
   )}
 
   {stats.best >= 90 && (
     <div className="question-box">
-      🥇 Score Above 90
+      ✓ Score above 90
     </div>
   )}
 
@@ -346,7 +346,7 @@ setPasswordMessage(
   <div className="modal-box">
 
     <h2>
-      🔒 Change Password
+      Change password
     </h2>
 
     <input

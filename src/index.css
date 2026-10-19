@@ -1813,3 +1813,22 @@ body.light-mode .hero-banner {
 .navbar {
   box-shadow: 0 1px 0 var(--surface-border);
 }
+
+/* Numbered mode tiles (replace emoji icons) */
+.mode-icon {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: 0.02em;
+}
+
+.feedback-card h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.feedback-card.good h3 { color: var(--color-success); }
+.feedback-card.bad h3 { color: var(--color-warning); }
+.feedback-card.tip h3 { color: var(--color-primary); }

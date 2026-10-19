@@ -366,29 +366,29 @@ useEffect(() => {
 
 score >= 90 ?
 
-"🏆 Outstanding Performance"
+"Outstanding Performance"
 
 :
 
 score >= 80 ?
 
-"⭐ Interview Ready"
+"Interview Ready"
 
 :
 
 score >= 70 ?
 
-"👍 Good Performance"
+"Good Performance"
 
 :
 
 score >= 60 ?
 
-"🙂 Needs More Practice"
+"Needs More Practice"
 
 :
 
-"📚 Keep Practicing"
+"Keep Practicing"
 
 }
 
@@ -416,7 +416,7 @@ score >= 60 ?
       navigate("/dashboard")
     }
   >
-    Dashboard 📊
+    Dashboard
   </button>
 
   <button
@@ -425,7 +425,7 @@ score >= 60 ?
     generateCertificate
   }
 >
-  Certificate 🏆
+  Certificate
 </button>
 </div>
       <div className="skills-section">
@@ -486,7 +486,7 @@ score >= 60 ?
       <div className="skills-section">
 
   <h2>
-    🎯 Personalized Improvement Plan
+    Personalized Improvement Plan
   </h2>
 
   {improvementPlan.map(
@@ -516,9 +516,9 @@ score >= 60 ?
       {strengths.length + weaknesses.length + suggestions.length > 0 ? (
         <div className="feedback-grid">
           {[
-            ["Strengths", "good", "✅", strengths],
-            ["Weaknesses", "bad", "⚠️", weaknesses],
-            ["Suggestions", "tip", "💡", suggestions],
+            ["Strengths", "good", "\u2713", strengths],
+            ["Weaknesses", "bad", "\u25B2", weaknesses],
+            ["Suggestions", "tip", "\u25C6", suggestions],
           ].map(([title, tone, icon, items]) => (
             <div key={title} className={`question-box feedback-card ${tone}`}>
               <h3>

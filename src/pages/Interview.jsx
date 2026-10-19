@@ -231,7 +231,7 @@ function Interview() {
 
       <div className="session-bar">
         <div className="timer-box">
-          ⏳ {Math.floor(timeLeft / 60)}:
+          ◷ {Math.floor(timeLeft / 60)}:
           {(timeLeft % 60).toString().padStart(2, "0")}
         </div>
         <p className="progress-text">{Math.round(progress)}% completed</p>
@@ -275,7 +275,7 @@ function Interview() {
           className="submit-btn btn-secondary"
           onClick={toggleListening}
         >
-          {isListening ? "🛑 Stop Recording" : "🎤 Start Recording"}
+          {isListening ? "\u25A0 Stop recording" : "\u25CF Start recording"}
         </button>
 
         <button
@@ -304,7 +304,7 @@ function Interview() {
           >
             <div className="big-spinner"></div>
 
-            <h2>🤖 AI is analyzing your interview...</h2>
+            <h2>Analyzing your interview...</h2>
 
             <div style={{ marginTop: "25px", textAlign: "left" }}>
               {loadingMessages.map((message, index) => (
@@ -313,10 +313,10 @@ function Interview() {
                   style={{ marginBottom: "12px", fontWeight: "500" }}
                 >
                   {index < loadingStep
-                    ? "✅"
+                    ? "\u2713"
                     : index === loadingStep
-                    ? "🟢"
-                    : "⚪"}{" "}
+                    ? "\u25CF"
+                    : "\u25CB"}{" "}
                   {message}
                 </p>
               ))}

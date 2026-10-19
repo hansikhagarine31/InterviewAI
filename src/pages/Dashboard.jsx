@@ -143,7 +143,7 @@ function Dashboard() {
 
     <div className="container fade-in">
 
-      <h1>Dashboard 📊</h1>
+      <h1>Dashboard</h1>
 
       <div className="dashboard-grid">
 
@@ -173,50 +173,31 @@ function Dashboard() {
 >
 
 <h2>
-🎯 Overall Performance
+Overall Performance
 </h2>
 
 <h1
   style={{
     marginTop: "20px",
-    fontSize: "34px"
+    fontSize: "34px",
+    letterSpacing: "0.15em",
+    color: "var(--color-primary)"
   }}
 >
 {
-averageScore >= 90
-
-?
-
-"🏆"
-
-:
-
-averageScore >= 80
-
-?
-
-"⭐"
-
-:
-
-averageScore >= 70
-
-?
-
-"👍"
-
-:
-
-averageScore >= 60
-
-?
-
-"📈"
-
-:
-
-"📚"
-
+"★".repeat(
+  averageScore >= 90 ? 5
+  : averageScore >= 80 ? 4
+  : averageScore >= 70 ? 3
+  : averageScore >= 60 ? 2
+  : 1
+) + "☆".repeat(
+  averageScore >= 90 ? 0
+  : averageScore >= 80 ? 1
+  : averageScore >= 70 ? 2
+  : averageScore >= 60 ? 3
+  : 4
+)
 }
 </h1>
 

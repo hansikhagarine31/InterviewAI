@@ -74,7 +74,7 @@ function Home() {
       <div className="hero-banner">
 
         <h1>
-          👋 Welcome back,
+          Welcome back,
           {" "}
           {user.name}
         </h1>
@@ -94,7 +94,7 @@ function Home() {
             navigate("/dashboard")
           }
         >
-          📊 View Dashboard
+          View dashboard →
         </button>
 
       </div>
@@ -107,7 +107,7 @@ function Home() {
 
         <div className="mode-card">
 
-          <span className="mode-icon">🤖</span>
+          <span className="mode-icon">01</span>
 
           <h2>General Interview</h2>
 
@@ -132,7 +132,7 @@ function Home() {
 
         <div className="mode-card">
 
-          <span className="mode-icon">🏢</span>
+          <span className="mode-icon">02</span>
 
           <h2>Company Specific</h2>
 
@@ -157,7 +157,7 @@ function Home() {
 
         <div className="mode-card">
 
-          <span className="mode-icon">⭐</span>
+          <span className="mode-icon">03</span>
 
           <h2>Resume Based Interview</h2>
 
@@ -229,7 +229,7 @@ function Home() {
 
       <div className="tip-banner">
 
-        <span className="tip-label">💡 Tip of the day</span>
+        <span className="tip-label">Tip of the day</span>
 
         <p>{tip}</p>
 

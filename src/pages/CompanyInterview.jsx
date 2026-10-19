@@ -295,7 +295,7 @@ Tip:
             >
 
               <h3>
-                🏢 Company Insights
+                Company Insights
               </h3>
 
               <div
