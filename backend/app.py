@@ -32,9 +32,11 @@ else:
 # Render's disks are ephemeral outside of a persistent Disk mount, so this
 # SQLite file will reset on redeploy unless DATABASE_URL points at a real
 # database (e.g. Render's managed Postgres) or a mounted Disk.
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
-    "DATABASE_URL", "sqlite:///users.db"
-)
+database_url = os.getenv("DATABASE_URL", "sqlite:///users.db")
+# Render/Heroku hand out "postgres://" URLs; SQLAlchemy 2.x needs "postgresql://".
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 # SECRET_KEY must be overridden in production via env var — never rely on
