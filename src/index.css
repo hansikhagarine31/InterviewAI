@@ -3,38 +3,41 @@
    Single source of truth for styling. Replaces the old styles.css/App.css.
    ========================================================================== */
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,500;6..72,600;6..72,700&display=swap");
 
+/* Ink wash palette: #4A4A4A charcoal, #CBCBCB mist, #FFFFE3 paper, #6D8196 slate */
 :root {
-  /* Brand: emerald -> lime, amber accent, warm green-black surfaces (no blue) */
-  --color-primary: #34d399;
-  --color-primary-light: #6ee7b7;
-  --color-primary-dark: #059669;
-  --color-accent: #fbbf24;
-  --color-accent-text: #fbbf24;
-  --color-highlight: #fbbf24;
-  --on-brand: #04140b;
-  --gradient-brand: linear-gradient(135deg, #34d399 0%, #a3e635 100%);
-  --gradient-soft: linear-gradient(135deg, rgba(52, 211, 153, 0.18), rgba(163, 230, 53, 0.07));
+  /* Dark theme (charcoal) */
+  --color-primary: #9fb1c4;
+  --color-primary-light: #b9c7d6;
+  --color-primary-dark: #6d8196;
+  --color-accent: #cbcbcb;
+  --color-accent-text: #ffffe3;
+  --color-highlight: #ffffe3;
+  --on-brand: #1f1f1f;
+  --gradient-brand: linear-gradient(135deg, #b4c3d3 0%, #7f93a8 100%);
+  --gradient-soft: linear-gradient(135deg, rgba(159, 177, 196, 0.2), rgba(203, 203, 203, 0.06));
+  --brand-rgb: 159, 177, 196;
 
-  /* Surfaces (dark theme, default) */
-  --bg-app: #0c110e;
-  --bg-app-2: #131a15;
-  --nav-bg: rgba(12, 17, 14, 0.8);
-  --surface-1: rgba(255, 255, 255, 0.045);
-  --surface-2: rgba(255, 255, 255, 0.08);
-  --surface-border: rgba(255, 255, 255, 0.09);
-  --input-bg: rgba(255, 255, 255, 0.05);
-  --text-primary: #eef3ee;
-  --text-secondary: #a6b0a8;
-  --text-muted: #6f7b72;
-  --chart-axis: #8a958d;
-  --chart-grid: rgba(138, 149, 141, 0.2);
+  --bg-app: #262626;
+  --bg-app-2: #2f2f2f;
+  --nav-bg: rgba(38, 38, 38, 0.85);
+  --surface-1: #303030;
+  --surface-2: #3b3b3b;
+  --surface-border: rgba(203, 203, 203, 0.16);
+  --input-bg: #2b2b2b;
+  --text-primary: #ffffe3;
+  --text-secondary: #cbcbcb;
+  --text-muted: #9a9a92;
+  --chart-axis: #a8a8a0;
+  --chart-grid: rgba(203, 203, 203, 0.14);
+  --tip-bg: rgba(255, 255, 227, 0.05);
+  --tip-border: rgba(255, 255, 227, 0.25);
 
-  /* Status */
-  --color-success: #4ade80;
-  --color-warning: #fbbf24;
-  --color-danger: #fb7185;
+  /* Status (muted, ink-friendly) */
+  --color-success: #8fbf9f;
+  --color-warning: #d9bd7a;
+  --color-danger: #d98a84;
 
   /* Scale */
   --radius-sm: 8px;
@@ -50,49 +53,56 @@
   --space-6: 32px;
   --space-7: 48px;
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25), 0 4px 14px rgba(0, 0, 0, 0.18);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25), 0 4px 14px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 20px 45px rgba(0, 0, 0, 0.4);
-  --shadow-glow: 0 10px 28px rgba(52, 211, 153, 0.32);
+  --shadow-glow: 0 8px 22px rgba(0, 0, 0, 0.35);
 
   --transition-fast: 150ms ease;
   --transition-base: 220ms cubic-bezier(0.4, 0, 0.2, 1);
 
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: "Newsreader", Georgia, "Times New Roman", serif;
 
   color-scheme: dark;
 }
 
-/* Light theme overrides — toggled via body.light-mode */
+/* Light theme = the default ink-wash paper look (body.light-mode is set on load) */
 body.light-mode {
-  --color-primary: #059669;
-  --color-primary-light: #047857;
-  --color-primary-dark: #065f46;
-  --color-accent: #d97706;
-  --color-accent-text: #b45309;
-  --color-highlight: #d97706;
-  --on-brand: #ffffff;
-  --gradient-brand: linear-gradient(135deg, #059669 0%, #65a30d 100%);
-  --gradient-soft: linear-gradient(135deg, rgba(5, 150, 105, 0.11), rgba(101, 163, 13, 0.06));
-  --bg-app: #f5f7f3;
-  --bg-app-2: #ecf0e9;
-  --nav-bg: rgba(255, 255, 255, 0.88);
-  --surface-1: #ffffff;
-  --surface-2: #eef2eb;
-  --surface-border: #e0e6dd;
-  --input-bg: #ffffff;
-  --text-primary: #131a15;
-  --text-secondary: #46514a;
-  --text-muted: #6d7971;
-  --chart-axis: #66726a;
-  --chart-grid: rgba(102, 114, 106, 0.18);
-  --color-success: #16a34a;
-  --color-warning: #d97706;
-  --color-danger: #e11d48;
-  --shadow-sm: 0 1px 2px rgba(19, 26, 21, 0.05), 0 4px 14px rgba(19, 26, 21, 0.06);
-  --shadow-md: 0 8px 24px rgba(19, 26, 21, 0.09);
-  --shadow-lg: 0 20px 45px rgba(19, 26, 21, 0.12);
-  --shadow-glow: 0 10px 28px rgba(5, 150, 105, 0.25);
+  --color-primary: #566b80;
+  --color-primary-light: #6d8196;
+  --color-primary-dark: #4a4a4a;
+  --color-accent: #6d8196;
+  --color-accent-text: #4f6275;
+  --color-highlight: #6d8196;
+  --on-brand: #ffffe3;
+  --gradient-brand: linear-gradient(135deg, #4a4a4a 0%, #566b80 100%);
+  --gradient-soft: linear-gradient(135deg, rgba(109, 129, 150, 0.16), rgba(203, 203, 203, 0.3));
+  --brand-rgb: 109, 129, 150;
+
+  --bg-app: #ffffe3;
+  --bg-app-2: #f4f4d6;
+  --nav-bg: rgba(255, 255, 227, 0.88);
+  --surface-1: #fffff2;
+  --surface-2: #f0f0d8;
+  --surface-border: #cbcbcb;
+  --input-bg: #fffff2;
+  --text-primary: #2a2a2a;
+  --text-secondary: #4a4a4a;
+  --text-muted: #6b6b66;
+  --chart-axis: #6b6b66;
+  --chart-grid: rgba(74, 74, 74, 0.14);
+  --tip-bg: rgba(109, 129, 150, 0.1);
+  --tip-border: rgba(109, 129, 150, 0.5);
+
+  --color-success: #4d7f5e;
+  --color-warning: #94741f;
+  --color-danger: #a24a43;
+
+  --shadow-sm: 0 1px 2px rgba(74, 74, 74, 0.06), 0 4px 14px rgba(74, 74, 74, 0.07);
+  --shadow-md: 0 8px 24px rgba(74, 74, 74, 0.1);
+  --shadow-lg: 0 20px 45px rgba(74, 74, 74, 0.14);
+  --shadow-glow: 0 8px 20px rgba(74, 74, 74, 0.22);
   color-scheme: light;
 }
 
@@ -116,8 +126,9 @@ body {
   font-family: var(--font-sans);
   background: var(--bg-app);
   background-image:
-    radial-gradient(circle at 12% -5%, rgba(52, 211, 153, 0.13), transparent 42%),
-    radial-gradient(circle at 92% 8%, rgba(251, 191, 36, 0.07), transparent 38%);
+    radial-gradient(ellipse 70% 45% at 8% -5%, rgba(var(--brand-rgb), 0.2), transparent 70%),
+    radial-gradient(ellipse 60% 40% at 95% 5%, rgba(203, 203, 203, 0.16), transparent 70%),
+    radial-gradient(ellipse 50% 35% at 70% 105%, rgba(var(--brand-rgb), 0.1), transparent 70%);
   background-attachment: fixed;
   color: var(--text-primary);
   min-height: 100vh;
@@ -138,6 +149,11 @@ a {
 
 button {
   font-family: inherit;
+}
+
+h1,
+h2 {
+  font-family: var(--font-serif);
 }
 
 h1,
@@ -395,8 +411,8 @@ select:focus-visible,
 }
 
 .btn-danger {
-  background: linear-gradient(135deg, #fb7185, #e11d48);
-  color: #fff;
+  background: linear-gradient(135deg, #b4635b, #8e4640);
+  color: #ffffe3;
 }
 
 /* ==========================================================================
@@ -436,7 +452,7 @@ select:focus-visible,
 .stat-card:hover {
   transform: translateY(-6px);
   box-shadow: var(--shadow-lg);
-  border-color: rgba(52, 211, 153, 0.5);
+  border-color: rgba(var(--brand-rgb), 0.55);
 }
 
 .card button {
@@ -663,7 +679,7 @@ select:focus,
 textarea:focus {
   outline: none;
   border-color: var(--color-primary-light);
-  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.28);
+  box-shadow: 0 0 0 3px rgba(var(--brand-rgb), 0.3);
 }
 
 textarea {
@@ -809,8 +825,8 @@ video {
   width: 60px;
   height: 60px;
   margin: 0 auto var(--space-4);
-  border: 5px solid rgba(255, 255, 255, 0.2);
-  border-top: 5px solid var(--color-accent);
+  border: 5px solid var(--surface-border);
+  border-top: 5px solid var(--color-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -856,7 +872,7 @@ video {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  background: linear-gradient(90deg, transparent, rgba(128, 128, 120, 0.15), transparent);
   animation: shimmer 1.4s infinite;
 }
 
@@ -960,7 +976,7 @@ h1 {
 
 /* Buttons: tidy secondary / danger variants + sizes */
 .submit-btn {
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.18) inset, 0 6px 16px rgba(52, 211, 153, 0.2);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.12) inset, 0 6px 16px rgba(0, 0, 0, 0.14);
 }
 
 .submit-btn.btn-secondary {
@@ -968,7 +984,7 @@ h1 {
 }
 
 .submit-btn.btn-danger:hover:not(:disabled) {
-  box-shadow: 0 10px 24px rgba(225, 29, 72, 0.35);
+  box-shadow: 0 10px 24px rgba(142, 70, 64, 0.35);
 }
 
 .btn-row {
@@ -1211,7 +1227,7 @@ textarea {
 .chip-primary {
   background: var(--gradient-soft);
   color: var(--color-primary);
-  border-color: rgba(52, 211, 153, 0.35);
+  border-color: rgba(var(--brand-rgb), 0.4);
 }
 
 .timer-box {
@@ -1365,20 +1381,20 @@ textarea {
 
 .score-badge.high {
   color: var(--color-success);
-  background: rgba(74, 222, 128, 0.12);
-  border-color: rgba(74, 222, 128, 0.3);
+  background: color-mix(in srgb, var(--color-success) 14%, transparent);
+  border-color: color-mix(in srgb, var(--color-success) 40%, transparent);
 }
 
 .score-badge.mid {
   color: var(--color-warning);
-  background: rgba(251, 191, 36, 0.12);
-  border-color: rgba(251, 191, 36, 0.3);
+  background: color-mix(in srgb, var(--color-warning) 14%, transparent);
+  border-color: color-mix(in srgb, var(--color-warning) 40%, transparent);
 }
 
 .score-badge.low {
   color: var(--color-danger);
-  background: rgba(251, 113, 133, 0.12);
-  border-color: rgba(251, 113, 133, 0.3);
+  background: color-mix(in srgb, var(--color-danger) 14%, transparent);
+  border-color: color-mix(in srgb, var(--color-danger) 40%, transparent);
 }
 
 details.feedback-details {
@@ -1544,7 +1560,7 @@ details.feedback-details pre {
   text-align: left;
   padding: var(--space-7) var(--space-6);
   background:
-    radial-gradient(circle at 100% 0%, rgba(251, 191, 36, 0.14), transparent 45%),
+    radial-gradient(circle at 100% 0%, rgba(203, 203, 203, 0.25), transparent 50%),
     var(--gradient-soft);
 }
 
@@ -1600,7 +1616,7 @@ details.feedback-details pre {
   margin-bottom: var(--space-4);
   border-radius: var(--radius-md);
   background: var(--gradient-soft);
-  border: 1px solid rgba(52, 211, 153, 0.25);
+  border: 1px solid rgba(var(--brand-rgb), 0.35);
 }
 
 .mode-card h2 {
@@ -1658,8 +1674,8 @@ details.feedback-details pre {
   margin-top: var(--space-4);
   padding: var(--space-4) var(--space-5);
   border-radius: var(--radius-lg);
-  border: 1px dashed rgba(251, 191, 36, 0.4);
-  background: rgba(251, 191, 36, 0.06);
+  border: 1px dashed var(--tip-border);
+  background: var(--tip-bg);
 }
 
 .tip-banner p {
@@ -1672,7 +1688,7 @@ details.feedback-details pre {
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--color-accent-text);
+  color: var(--color-primary);
   white-space: nowrap;
 }
 
@@ -1681,7 +1697,7 @@ details.feedback-details pre {
 .mode-card,
 .stat-card,
 .dashboard-card {
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 40%);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 40%);
 }
 
 body.light-mode .question-box,
@@ -1756,4 +1772,44 @@ body.light-mode .dashboard-card {
   font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
+}
+
+/* Ink wash refinements */
+.stat-card h2,
+.dashboard-card h2,
+.score-card h2 {
+  font-family: var(--font-sans);
+}
+
+.logo {
+  font-family: var(--font-serif);
+  font-size: 1.45rem;
+  letter-spacing: -0.01em;
+}
+
+.logo-accent {
+  color: var(--color-primary);
+}
+
+.submit-btn {
+  letter-spacing: 0.01em;
+}
+
+/* brush-stroke underline under page titles */
+.container > h1:first-child::after {
+  width: 64px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--text-secondary), var(--color-primary) 60%, transparent);
+}
+
+.hero-banner {
+  border-color: var(--surface-border);
+}
+
+body.light-mode .hero-banner {
+  box-shadow: var(--shadow-sm);
+}
+
+.navbar {
+  box-shadow: 0 1px 0 var(--surface-border);
 }

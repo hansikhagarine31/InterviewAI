@@ -345,11 +345,11 @@ useEffect(() => {
           styles={buildStyles({
             textSize: "12px",
             pathColor:
-              "#34d399",
+              "#6d8196",
             textColor:
               "var(--text-primary)",
             trailColor:
-              "rgba(138,149,141,0.25)",
+              "rgba(138,138,130,0.3)",
           })}
         />
       </div>

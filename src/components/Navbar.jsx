@@ -5,7 +5,9 @@ import { getStoredUser } from "../api/client";
 function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(
+    () => !document.body.classList.contains("light-mode")
+  );
   const [menuOpen, setMenuOpen] = useState(false);
 
   if (location.pathname === "/login" || location.pathname === "/register") {
@@ -15,8 +17,13 @@ function Navbar() {
   const user = getStoredUser();
 
   const toggleTheme = () => {
-    document.body.classList.toggle("light-mode");
-    setDarkMode(!darkMode);
+    const light = document.body.classList.toggle("light-mode");
+    setDarkMode(!light);
+    try {
+      localStorage.setItem("theme", light ? "light" : "dark");
+    } catch {
+      // storage unavailable: the choice just won't persist
+    }
   };
 
   const logout = () => {
